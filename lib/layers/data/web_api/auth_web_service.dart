@@ -9,7 +9,7 @@ class AuthWebService {
   // login request
   Future<LoginResponseDto> login(String username, String password) async {
     final res = await dioClient.post(
-      '/login',
+      '/v1/auth/login',
       data: {'username': username, 'password': password},
     );
     return LoginResponseDto.fromJson(res.data);

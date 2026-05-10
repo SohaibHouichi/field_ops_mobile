@@ -30,7 +30,7 @@ class DioGenerate {
     const Duration timeout = Duration(seconds: 600); // Use const
     if (_dio == null) {
       _dio = Dio(
-        BaseOptions(baseUrl: "http://192.168.1.36:6000" )
+        BaseOptions(baseUrl: "http://fieldopsapi.runasp.net/api" )
       );
       _dio!
         ..options.connectTimeout = timeout
