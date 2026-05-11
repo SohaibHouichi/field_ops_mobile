@@ -18,12 +18,9 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GlobalKey<FormState> loginKey = GlobalKey<FormState>();
-    final TextEditingController usernameController = TextEditingController();
-    final TextEditingController passwordController = TextEditingController();
-      LoginRequestDto loginData =  LoginRequestDto(
-    username: usernameController.text.trim(),
-    password: passwordController.text, );
+    final GlobalKey<FormState> _loginKey = GlobalKey<FormState>();
+    final TextEditingController _usernameController = TextEditingController();
+    final TextEditingController _passwordController = TextEditingController();
 
     return Scaffold(
       appBar: AppBar(
@@ -67,7 +64,7 @@ class LoginScreen extends StatelessWidget {
             },
           ),
           Form(
-            key: loginKey,
+            key: _loginKey,
             child: Padding(
               padding: const EdgeInsets.all(15.0),
               child: Column(
@@ -75,7 +72,7 @@ class LoginScreen extends StatelessWidget {
                 children: [
                   CustomTextFormField(
                     textLable: 'Username',
-                    controller: usernameController,
+                    controller: _usernameController,
                     hint: 'Enter your username',
 
                     validator: (value) =>
@@ -109,7 +106,7 @@ class LoginScreen extends StatelessWidget {
                   BlocBuilder<AuthCubit, AuthState>(
                     builder: (context, state) {
                       return CustomTextFormField(
-                        controller: passwordController,
+                        controller: _passwordController,
                         hint: '*********************',
                         obscureText: context.watch<AuthCubit>().isNotVisible,
                         validator: (value) => (value == null || value.isEmpty)
@@ -135,10 +132,12 @@ class LoginScreen extends StatelessWidget {
 
                   MaterialButton(
                     onPressed: () {
-                      if (loginKey.currentState!.validate()) {
-                        context.read<AuthCubit>().login(
-                       loginData
+                      if (_loginKey.currentState!.validate()) {
+                        LoginRequestDto loginData = LoginRequestDto(
+                          email: _usernameController.text,
+                          password: _passwordController.text,
                         );
+                        context.read<AuthCubit>().login(loginData);
                       }
                     },
                     color: primaryBlue,
@@ -191,7 +190,10 @@ class LoginScreen extends StatelessWidget {
                       Expanded(
                         child: MaterialButton(
                           onPressed: () {
-                            /// call the biomitric registering
+                            print(
+                              _usernameController.text.trim() +
+                                  _passwordController.text,
+                            );
                           },
                           elevation: 0,
                           color: inputFill,
@@ -216,7 +218,7 @@ class LoginScreen extends StatelessWidget {
                       Expanded(
                         child: MaterialButton(
                           onPressed: () {
-                            context.go(homePagePath);
+                            
                           },
                           elevation: 0,
                           color: inputFill,

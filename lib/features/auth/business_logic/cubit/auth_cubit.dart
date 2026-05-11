@@ -7,26 +7,26 @@ part 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
   late AuthRepository authRepository;
-  bool isNotVisible = true  ;
+  bool isNotVisible = true;
   AuthCubit(this.authRepository) : super(AuthInitial());
-
 
   String message = '';
   void toggle() {
     isNotVisible = !isNotVisible;
     emit(AuthInitial());
   }
+
   Future<void> login(LoginRequestDto req) async {
     emit(AuthLoading());
-    try {
-      await authRepository.login(req);
+    final res = await authRepository.login(req);
+    if (res.statusCode == 200) {
       emit(AuthSuccess());
-    } catch (e) {
+      // ShartedPreferences.getInstance().then((prefs) {
+      //   prefs.setString('token', res.data['token']);
+      // });
+    } else {
       message = 'username or password invalid';
       emit(AuthFailed(message));
     }
   }
-
 }
-
-

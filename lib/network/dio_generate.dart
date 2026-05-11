@@ -63,6 +63,7 @@ class DioGenerate {
     } else {
       // Mobile headers
       _dio!.options.headers = {
+        'Content-Type': 'application/json',
         'Accept': 'application/json',
         // Authorization header will be added by AuthInterceptor
       };
