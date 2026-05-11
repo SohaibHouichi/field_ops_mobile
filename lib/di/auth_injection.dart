@@ -1,7 +1,7 @@
 import 'package:field_ops/di/di_container.dart';
-import 'package:field_ops/layers/business_logic/cubit/Auth/auth_cubit.dart';
-import 'package:field_ops/layers/data/repository/auth_repository.dart';
-import 'package:field_ops/layers/data/web_api/auth_web_service.dart';
+import 'package:field_ops/features/auth/business_logic/cubit/auth_cubit.dart';
+import 'package:field_ops/features/auth/data/repository/auth_repository.dart';
+import 'package:field_ops/features/auth/data/api/auth_web_service.dart';
 import 'package:field_ops/network/dio_generate.dart';
 
 

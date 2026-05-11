@@ -1,6 +1,6 @@
 import 'package:field_ops/constants/about_routing.dart';
 import 'package:field_ops/di/auth_injection.dart';
-import 'package:field_ops/layers/business_logic/cubit/Auth/auth_cubit.dart';
+import 'package:field_ops/features/auth/business_logic/cubit/auth_cubit.dart';
 import 'package:field_ops/layers/business_logic/cubit/Home/home_cubit.dart';
 import 'package:field_ops/features/auth/presentation/screens/login_screen.dart';
 import 'package:field_ops/features/auth/presentation/screens/password_restoring_screen.dart';

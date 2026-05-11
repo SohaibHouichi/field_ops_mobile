@@ -1,6 +1,7 @@
 import 'package:field_ops/constants/about_coloring.dart';
 import 'package:field_ops/constants/about_routing.dart';
-import 'package:field_ops/layers/business_logic/cubit/Auth/auth_cubit.dart';
+import 'package:field_ops/features/auth/business_logic/cubit/auth_cubit.dart';
+import 'package:field_ops/features/auth/data/models/DTO/login_request_dto.dart';
 //import 'package:field_ops/layers/business_logic/cubit/login_/password_cubit.dart';
 import 'package:field_ops/layers/presentation/widgets/app_bar_title.dart';
 import 'package:field_ops/layers/presentation/widgets/description_text.dart';
@@ -17,6 +18,13 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final GlobalKey<FormState> loginKey = GlobalKey<FormState>();
+    final TextEditingController usernameController = TextEditingController();
+    final TextEditingController passwordController = TextEditingController();
+      LoginRequestDto loginData =  LoginRequestDto(
+    username: usernameController.text.trim(),
+    password: passwordController.text, );
+
     return Scaffold(
       appBar: AppBar(
         forceMaterialTransparency: true,
@@ -38,13 +46,13 @@ class LoginScreen extends StatelessWidget {
             colorBlendMode: .difference,
             filterQuality: .high,
           ),
-          GeneraleTitle(text: 'Welcome Back' ,),
+          GeneraleTitle(text: 'Welcome Back'),
           DescriptionText(text: 'Log in to manage your field service '),
           BlocBuilder<AuthCubit, AuthState>(
             builder: (context, state) {
               if (state is AuthSuccess) {
                 return Center(
-                  child: Lable(text: 'Success', color: Colors.green,),
+                  child: Lable(text: 'Success', color: Colors.green),
                 );
               } else if (state is AuthFailed) {
                 return Center(
@@ -59,7 +67,7 @@ class LoginScreen extends StatelessWidget {
             },
           ),
           Form(
-            key: context.read<AuthCubit>().loginKey,
+            key: loginKey,
             child: Padding(
               padding: const EdgeInsets.all(15.0),
               child: Column(
@@ -67,20 +75,20 @@ class LoginScreen extends StatelessWidget {
                 children: [
                   CustomTextFormField(
                     textLable: 'Username',
-                    controller: context.read<AuthCubit>().usernameController,
+                    controller: usernameController,
                     hint: 'Enter your username',
-      
+
                     validator: (value) =>
                         (value == null || value.isEmpty) ? 'Required' : null,
-      
+
                     prefixIcon: Icon(
                       Icons.person_rounded,
                       color: secondaryText,
                     ),
                   ),
-      
+
                   SizedBox(height: 16),
-      
+
                   Row(
                     mainAxisAlignment: .spaceBetween,
                     children: [
@@ -97,19 +105,17 @@ class LoginScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-      
+
                   BlocBuilder<AuthCubit, AuthState>(
                     builder: (context, state) {
                       return CustomTextFormField(
-                        controller: context
-                            .read<AuthCubit>()
-                            .passwordController,
+                        controller: passwordController,
                         hint: '*********************',
-                        obscureText: context.watch<AuthCubit>().isNotVisible, 
+                        obscureText: context.watch<AuthCubit>().isNotVisible,
                         validator: (value) => (value == null || value.isEmpty)
                             ? 'Required'
                             : null,
-      
+
                         prefixIcon: Icon(Icons.lock, color: secondaryText),
                         suffixIcon: IconButton(
                           onPressed: () {
@@ -124,18 +130,14 @@ class LoginScreen extends StatelessWidget {
                       );
                     },
                   ),
-      
+
                   SizedBox(height: 16),
-      
+
                   MaterialButton(
                     onPressed: () {
-                      if (context
-                          .read<AuthCubit>()
-                          .loginKey
-                          .currentState!
-                          .validate()) {
+                      if (loginKey.currentState!.validate()) {
                         context.read<AuthCubit>().login(
-                          context.read<AuthCubit>().req,
+                       loginData
                         );
                       }
                     },
@@ -148,7 +150,7 @@ class LoginScreen extends StatelessWidget {
                     child: BlocConsumer<AuthCubit, AuthState>(
                       builder: (context, state) {
                         if (state is AuthLoading) {
-                          return CircularProgressIndicator(color: Colors.white,);
+                          return CircularProgressIndicator(color: Colors.white);
                         }
                         return Row(
                           mainAxisAlignment: .center,
@@ -165,9 +167,9 @@ class LoginScreen extends StatelessWidget {
                       },
                     ),
                   ),
-      
+
                   SizedBox(height: 24),
-      
+
                   Row(
                     children: [
                       const Expanded(child: Divider(thickness: 1)),
@@ -181,9 +183,9 @@ class LoginScreen extends StatelessWidget {
                       const Expanded(child: Divider(thickness: 1)),
                     ],
                   ),
-      
+
                   SizedBox(height: 16),
-      
+
                   Row(
                     children: [
                       Expanded(
@@ -238,14 +240,11 @@ class LoginScreen extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 16),
-      
+
                   Row(
                     mainAxisAlignment: .center,
                     children: [
-                      Lable(
-                        text: "Don't have an account?",
-                        color: Colors.grey,
-                      ),
+                      Lable(text: "Don't have an account?", color: Colors.grey),
                       MaterialButton(
                         visualDensity: .compact,
                         onPressed: () {
