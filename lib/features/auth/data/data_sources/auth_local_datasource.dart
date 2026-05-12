@@ -4,7 +4,7 @@ import '../../../../core/helpers/shared_pref_helper.dart';
 
 abstract class AuthLocalDataSource {
   Future<void> cacheUser(LoginResponseModel user);
-  Future<LoginResponseModel> getCachedUser();
+  Future<LoginResponseModel?> getCachedUser();
   Future<void> clearUser();
 }
 
@@ -26,16 +26,16 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   }
 
   @override
-  Future<LoginResponseModel> getCachedUser() async {
+  Future<LoginResponseModel?> getCachedUser() async {
     final token = await SharedPrefHelper.getSecuredString(LocalStorageKeys.accessToken);
-    if (token.isEmpty) throw Exception('No cached user found');
+    if (token.isEmpty) return null;
     final userId   = await SharedPrefHelper.getInt(LocalStorageKeys.userId);
     final username = await SharedPrefHelper.getString(LocalStorageKeys.username);
     final email    = await SharedPrefHelper.getString(LocalStorageKeys.email);
     final role     = await SharedPrefHelper.getString(LocalStorageKeys.role);
     final tenantJson = await SharedPrefHelper.getString(LocalStorageKeys.tenantInfo);
 
-    if (username.isEmpty || email.isEmpty || tenantJson.isEmpty) throw Exception('Incomplete cached user data');
+    if (username.isEmpty || email.isEmpty || tenantJson.isEmpty) return null;
 
     return LoginResponseModel.fromJson({
       'userId': userId,
