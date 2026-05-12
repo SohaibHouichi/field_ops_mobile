@@ -1,4 +1,4 @@
-import 'package:field_ops/constants/about_coloring.dart';
+import 'package:field_ops/core/constants/about_coloring.dart';
 import 'package:field_ops/layers/business_logic/cubit/Home/home_cubit.dart';
 import 'package:field_ops/layers/presentation/widgets/custom_card.dart';
 import 'package:field_ops/layers/presentation/widgets/description_text.dart';

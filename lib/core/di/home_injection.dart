@@ -1,8 +1,6 @@
-  import 'package:field_ops/di/di_container.dart';
 import 'package:field_ops/layers/business_logic/cubit/Home/home_cubit.dart';
+import 'package:get_it/get_it.dart';
 
-final getIt = DiContainer().getIt;
-
-void setupHome() {
+void setupHome(GetIt getIt) {
   getIt.registerFactory(()=>HomeCubit());
 }

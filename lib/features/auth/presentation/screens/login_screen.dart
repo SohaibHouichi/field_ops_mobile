@@ -1,269 +1,316 @@
-import 'package:field_ops/constants/about_coloring.dart';
-import 'package:field_ops/constants/about_routing.dart';
-import 'package:field_ops/features/auth/business_logic/cubit/auth_cubit.dart';
-import 'package:field_ops/features/auth/data/models/DTO/login_request_dto.dart';
-//import 'package:field_ops/layers/business_logic/cubit/login_/password_cubit.dart';
-import 'package:field_ops/layers/presentation/widgets/app_bar_title.dart';
-import 'package:field_ops/layers/presentation/widgets/description_text.dart';
-import 'package:field_ops/layers/presentation/widgets/generale_title.dart';
-import 'package:field_ops/layers/presentation/widgets/lable.dart';
-import 'package:field_ops/layers/presentation/widgets/text_form_field.dart';
+import 'package:field_ops/core/constants/about_coloring.dart';
+import 'package:field_ops/core/constants/about_routing.dart';
+import 'package:field_ops/core/constants/app_strings.dart';
+import 'package:field_ops/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:field_ops/features/auth/presentation/widgets/field_widget.dart';
+import 'package:field_ops/core/widgets/pulse_dot_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+
+final _loginKey = GlobalKey<FormState>();
+final _usernameController = TextEditingController();
+final _passwordController = TextEditingController();
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final GlobalKey<FormState> _loginKey = GlobalKey<FormState>();
-    final TextEditingController _usernameController = TextEditingController();
-    final TextEditingController _passwordController = TextEditingController();
-
-    return Scaffold(
-      appBar: AppBar(
-        forceMaterialTransparency: true,
-
-        leading: IconButton(
-          onPressed: () => SystemNavigator.pop(),
-          icon: Icon(Icons.arrow_back_ios_new_rounded),
-        ),
-
-        title: AppBarTitle(text: 'FieldOPS'),
-        centerTitle: true,
-      ),
-      backgroundColor: bgColor,
-      body: ListView(
-        children: [
-          Image.asset(
-            'assets/img/login.png',
-            height: 200,
-            colorBlendMode: .difference,
-            filterQuality: .high,
-          ),
-          GeneraleTitle(text: 'Welcome Back'),
-          DescriptionText(text: 'Log in to manage your field service '),
-          BlocBuilder<AuthCubit, AuthState>(
-            builder: (context, state) {
-              if (state is AuthSuccess) {
-                return Center(
-                  child: Lable(text: 'Success', color: Colors.green),
-                );
-              } else if (state is AuthFailed) {
-                return Center(
-                  child: Lable(
-                    text: context.read<AuthCubit>().message,
-                    color: Colors.red,
-                  ),
-                );
-              } else {
-                return SizedBox.shrink();
-              }
-            },
-          ),
-          Form(
-            key: _loginKey,
-            child: Padding(
-              padding: const EdgeInsets.all(15.0),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark,
+      child: Scaffold(
+        backgroundColor: bgColor,
+        body: BlocListener<AuthCubit, AuthState>(
+          listener: (context, state) {
+            if (state is AuthAuthenticated) {
+              context.go(homePagePath);
+            }
+          },
+          child: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
-                crossAxisAlignment: .stretch,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CustomTextFormField(
-                    textLable: 'Username',
-                    controller: _usernameController,
-                    hint: 'Enter your username',
+                  const SizedBox(height: 24),
 
-                    validator: (value) =>
-                        (value == null || value.isEmpty) ? 'Required' : null,
-
-                    prefixIcon: Icon(
-                      Icons.person_rounded,
-                      color: secondaryText,
+                  // ── Logo chip ─────────────────────────────────────────
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: chipBg,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: chipBorder),
                     ),
-                  ),
-
-                  SizedBox(height: 16),
-
-                  Row(
-                    mainAxisAlignment: .spaceBetween,
-                    children: [
-                      Lable(text: 'Password', color: Colors.black),
-                      MaterialButton(
-                        visualDensity: .compact,
-                        onPressed: () {
-                          context.push(passwordRestorePath);
-                        }, //change
-                        child: Lable(
-                          text: 'Forget password?',
-                          color: primaryBlue,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  BlocBuilder<AuthCubit, AuthState>(
-                    builder: (context, state) {
-                      return CustomTextFormField(
-                        controller: _passwordController,
-                        hint: '*********************',
-                        obscureText: context.watch<AuthCubit>().isNotVisible,
-                        validator: (value) => (value == null || value.isEmpty)
-                            ? 'Required'
-                            : null,
-
-                        prefixIcon: Icon(Icons.lock, color: secondaryText),
-                        suffixIcon: IconButton(
-                          onPressed: () {
-                            context.read<AuthCubit>().toggle();
-                          },
-                          icon: Icon(
-                            context.watch<AuthCubit>().isNotVisible
-                                ? Icons.visibility_off
-                                : Icons.visibility,
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        PulseDot(),
+                        SizedBox(width: 8),
+                        Text(
+                          appName,
+                          style: TextStyle(
+                            color: primaryBlue,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 2,
                           ),
                         ),
-                      );
-                    },
-                  ),
-
-                  SizedBox(height: 16),
-
-                  MaterialButton(
-                    onPressed: () {
-                      if (_loginKey.currentState!.validate()) {
-                        LoginRequestDto loginData = LoginRequestDto(
-                          email: _usernameController.text,
-                          password: _passwordController.text,
-                        );
-                        context.read<AuthCubit>().login(loginData);
-                      }
-                    },
-                    color: primaryBlue,
-                    padding: .all(20),
-                    shape: OutlineInputBorder(
-                      borderRadius: .all(Radius.circular(8)),
-                      borderSide: .none,
-                    ),
-                    child: BlocConsumer<AuthCubit, AuthState>(
-                      builder: (context, state) {
-                        if (state is AuthLoading) {
-                          return CircularProgressIndicator(color: Colors.white);
-                        }
-                        return Row(
-                          mainAxisAlignment: .center,
-                          children: [
-                            Lable(text: 'SIGN IN  ', color: Colors.white),
-                            Icon(Icons.login, color: Colors.white),
-                          ],
-                        );
-                      },
-                      listener: (context, state) {
-                        if (state is AuthSuccess) {
-                          context.push(homePagePath);
-                        }
-                      },
+                      ],
                     ),
                   ),
 
-                  SizedBox(height: 24),
+                  const SizedBox(height: 28),
 
-                  Row(
-                    children: [
-                      const Expanded(child: Divider(thickness: 1)),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Lable(
-                          text: 'OR CONTINUE WITH',
-                          color: Colors.grey,
-                        ),
-                      ),
-                      const Expanded(child: Divider(thickness: 1)),
-                    ],
+                  // ── Headline ──────────────────────────────────────────
+                  const Text(
+                    loginHeadline,
+                    style: TextStyle(
+                      color: primaryText,
+                      fontSize: 38,
+                      fontWeight: FontWeight.w700,
+                      height: 1.05,
+                      letterSpacing: -1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    loginSubtitle,
+                    style: TextStyle(color: secondaryText, fontSize: 13),
                   ),
 
-                  SizedBox(height: 16),
+                  const SizedBox(height: 32),
 
-                  Row(
-                    children: [
-                      Expanded(
-                        child: MaterialButton(
-                          onPressed: () {
-                            print(
-                              _usernameController.text.trim() +
-                                  _passwordController.text,
+                  // ── Card ──────────────────────────────────────────────
+                  Container(
+                    decoration: BoxDecoration(
+                      color: cardBg,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: inputBorder),
+                    ),
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Error banner
+                        BlocBuilder<AuthCubit, AuthState>(
+                          buildWhen: (p, c) =>
+                              c is AuthError || p is AuthError,
+                          builder: (_, state) {
+                            if (state is! AuthError) {
+                              return const SizedBox.shrink();
+                            }
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 20),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: const Color(0x22FF4D4D),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                    color: const Color(0x55FF4D4D)),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.error_outline,
+                                      color: Color(0xFFFF6B6B), size: 16),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      state.message,
+                                      style: const TextStyle(
+                                        color: Color(0xFFFF6B6B),
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             );
                           },
-                          elevation: 0,
-                          color: inputFill,
-                          padding: .all(20),
-                          shape: OutlineInputBorder(
-                            borderRadius: .all(Radius.circular(8)),
-                            borderSide: BorderSide(
-                              width: 1,
-                              color: secondaryText,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: .spaceEvenly,
-                            children: [
-                              Icon(Icons.fingerprint, color: Colors.grey),
-                              Lable(text: 'Biomitric  ', color: Colors.black),
-                            ],
-                          ),
                         ),
-                      ),
-                      SizedBox(width: 5),
-                      Expanded(
-                        child: MaterialButton(
-                          onPressed: () {
-                            
-                          },
-                          elevation: 0,
-                          color: inputFill,
-                          padding: .all(20),
-                          shape: OutlineInputBorder(
-                            borderRadius: .all(Radius.circular(8)),
-                            borderSide: BorderSide(
-                              width: 1,
-                              color: secondaryText,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: .spaceEvenly,
-                            children: [
-                              Icon(Icons.key_sharp, color: Colors.grey),
-                              Lable(text: 'SSO  ', color: Colors.black),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 16),
 
-                  Row(
-                    mainAxisAlignment: .center,
-                    children: [
-                      Lable(text: "Don't have an account?", color: Colors.grey),
-                      MaterialButton(
-                        visualDensity: .compact,
-                        onPressed: () {
-                          context.go(signUpPagePath);
-                        }, //change
-                        child: Lable(
-                          text: 'Request Access',
-                          color: primaryBlue,
+                        Form(
+                          key: _loginKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Username
+                              Field(
+                                label: usernameLabel,
+                                hint: usernameHint,
+                                controller: _usernameController,
+                                icon: Icons.person_outline_rounded,
+                                validator: (v) =>
+                                    (v == null || v.isEmpty)
+                                        ? validationRequired
+                                        : null,
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              // Password
+                              BlocBuilder<AuthCubit, AuthState>(
+                                builder: (context, state) {
+                                  final hidden =
+                                      context.watch<AuthCubit>().isNotVisible;
+                                  return Field(
+                                    label: passwordLabel,
+                                    hint: passwordHint,
+                                    controller: _passwordController,
+                                    icon: Icons.lock_outline_rounded,
+                                    obscureText: hidden,
+                                    validator: (v) =>
+                                        (v == null || v.isEmpty)
+                                            ? validationRequired
+                                            : null,
+                                    suffix: IconButton(
+                                      onPressed: () =>
+                                          context.read<AuthCubit>().toggle(),
+                                      icon: Icon(
+                                        hidden
+                                            ? Icons.visibility_off_outlined
+                                            : Icons.visibility_outlined,
+                                        color: secondaryText,
+                                        size: 18,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+
+                              // Forgot password
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed: () =>
+                                      context.push(passwordRestorePath),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: primaryBlue,
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8),
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  child: const Text(
+                                    forgotPassword,
+                                    style: TextStyle(fontSize: 12),
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(height: 4),
+
+                              // Sign in button
+                              BlocBuilder<AuthCubit, AuthState>(
+                                buildWhen: (p, c) =>
+                                    c is AuthLoading || p is AuthLoading,
+                                builder: (context, state) {
+                                  final loading = state is AuthLoading;
+                                  return SizedBox(
+                                    width: double.infinity,
+                                    height: 52,
+                                    child: ElevatedButton(
+                                      onPressed: loading
+                                          ? null
+                                          : () {
+                                              if (_loginKey.currentState!
+                                                  .validate()) {
+                                                context
+                                                    .read<AuthCubit>()
+                                                    .login(
+                                                      email: _usernameController
+                                                          .text
+                                                          .trim(),
+                                                      password:
+                                                          _passwordController
+                                                              .text,
+                                                    );
+                                              }
+                                            },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: primaryBlue,
+                                        foregroundColor: Colors.white,
+                                        disabledBackgroundColor: accentDim,
+                                        elevation: 0,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                      child: loading
+                                          ? const SizedBox(
+                                              width: 20,
+                                              height: 20,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2.5,
+                                                color: Colors.white,
+                                              ),
+                                            )
+                                          : const Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  signIn,
+                                                  style: TextStyle(
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.w600,
+                                                    letterSpacing: 0.3,
+                                                  ),
+                                                ),
+                                                SizedBox(width: 8),
+                                                Icon(Icons.arrow_forward,
+                                                    size: 18),
+                                              ],
+                                            ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
+
+                  const SizedBox(height: 28),
+
+                  // ── Request access ────────────────────────────────────
+                  Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          noAccount,
+                          style:
+                              TextStyle(color: secondaryText, fontSize: 13),
+                        ),
+                        GestureDetector(
+                          onTap: () => context.go(signUpPagePath),
+                          child: const Text(
+                            requestAccess,
+                            style: TextStyle(
+                              color: primaryBlue,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 32),
                 ],
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

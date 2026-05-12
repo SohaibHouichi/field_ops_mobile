@@ -1,5 +1,5 @@
-import 'package:field_ops/app_router.dart';
-import 'package:field_ops/di/di_container.dart';
+import 'package:field_ops/core/routes/app_router.dart';
+import 'package:field_ops/core/di/di_container.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -15,6 +15,9 @@ class FieldOPS extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
       debugShowCheckedModeBanner: false,
       routerConfig: appRouter ,
     );

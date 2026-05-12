@@ -1,4 +1,4 @@
-import 'package:field_ops/constants/about_coloring.dart';
+import 'package:field_ops/core/constants/about_coloring.dart';
 import 'package:field_ops/layers/presentation/widgets/app_bar_title.dart';
 import 'package:field_ops/layers/presentation/widgets/custom_card.dart';
 import 'package:flutter/material.dart';

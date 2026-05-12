@@ -16,5 +16,7 @@ const Color inputText = Color(0xFFD9E1EC);
 const Color inputBorder   = Color(0xFFD9E1EC);
 const Color inputFill     = Color(0xFFFFFFFF);
 
-
-
+const Color cardBg       = Color(0xFFFFFFFF);
+const Color accentDim    = Color(0x261E7BEA);
+const Color chipBg       = Color(0xFFE8F2FD);
+const Color chipBorder   = Color(0xFFB5D4F4);

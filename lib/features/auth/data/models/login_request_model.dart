@@ -1,8 +1,8 @@
-class LoginRequestDto {
+class LoginRequestModel {
   String email ; 
   String password ; 
 
-  LoginRequestDto({
+  LoginRequestModel({
     required this.email,
     required this.password
   });
