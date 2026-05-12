@@ -1,4 +1,4 @@
-import 'package:field_ops/core/constants/about_coloring.dart';
+import 'package:field_ops/core/constants/app_color.dart';
 import 'package:flutter/material.dart';
 
 class CardText extends StatelessWidget {

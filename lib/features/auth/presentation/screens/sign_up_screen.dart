@@ -1,5 +1,5 @@
-import 'package:field_ops/core/constants/about_coloring.dart';
-import 'package:field_ops/core/constants/about_routing.dart';
+import 'package:field_ops/core/constants/app_color.dart';
+import 'package:field_ops/core/constants/app_router.dart';
 import 'package:field_ops/layers/presentation/widgets/app_bar_title.dart';
 import 'package:field_ops/layers/presentation/widgets/description_text.dart';
 import 'package:field_ops/layers/presentation/widgets/generale_title.dart';

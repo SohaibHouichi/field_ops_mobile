@@ -1,5 +1,5 @@
-import 'package:field_ops/core/constants/about_routing.dart';
-import 'package:field_ops/layers/presentation/screens/shell_/shell_requirement_model.dart';
+import 'package:field_ops/core/constants/app_router.dart';
+import 'package:field_ops/core/routes/shell_/shell_requirement_model.dart';
 
 Map<String, ShellRequirementModel> shellConfigRoute = {
   homePagePath: ShellRequirementModel(

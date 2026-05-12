@@ -1,5 +1,5 @@
-import 'package:field_ops/layers/presentation/screens/shell_/shell_config_route.dart';
-import 'package:field_ops/layers/presentation/screens/shell_/shell_requirement_model.dart';
+import 'package:field_ops/core/routes/shell_/shell_config_route.dart';
+import 'package:field_ops/core/routes/shell_/shell_requirement_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 

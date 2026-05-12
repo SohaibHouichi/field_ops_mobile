@@ -1,3 +1,5 @@
+
+// ------------- LOGIN STRINGS -------------
 const String appName = 'FIELDOPS';
 const String loginHeadline = 'Welcome\nback.';
 const String loginSubtitle = 'Field Service Management Platform';
@@ -14,3 +16,4 @@ const String signIn = 'Sign In';
 
 const String noAccount = "Don't have an account? ";
 const String requestAccess = 'Request Access';
+// ------------- END LOGIN STRINGS -------------

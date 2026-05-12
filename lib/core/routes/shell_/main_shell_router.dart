@@ -1,12 +1,12 @@
-import 'package:field_ops/core/constants/about_coloring.dart';
-import 'package:field_ops/core/constants/about_routing.dart';
+import 'package:field_ops/core/constants/app_color.dart';
+import 'package:field_ops/core/constants/app_router.dart';
 import 'package:field_ops/core/di/di_container.dart';
 import 'package:field_ops/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:field_ops/layers/presentation/widgets/app_bar_title.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:field_ops/layers/presentation/screens/shell_/shell_config.dart';
+import 'package:field_ops/core/routes/shell_/shell_config.dart';
 
 class MainShellRouter extends StatelessWidget {
   final StatefulNavigationShell navigationShell;

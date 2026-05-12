@@ -1,5 +1,5 @@
-import 'package:field_ops/core/constants/about_coloring.dart';
-import 'package:field_ops/core/constants/about_routing.dart';
+import 'package:field_ops/core/constants/app_color.dart';
+import 'package:field_ops/core/constants/app_router.dart';
 import 'package:field_ops/core/constants/app_strings.dart';
 import 'package:field_ops/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:field_ops/features/auth/presentation/widgets/field_widget.dart';

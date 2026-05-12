@@ -1,4 +1,4 @@
-import 'package:field_ops/core/constants/about_routing.dart';
+import 'package:field_ops/core/constants/app_router.dart';
 import 'package:field_ops/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:field_ops/layers/business_logic/cubit/Home/home_cubit.dart';
 import 'package:field_ops/features/auth/presentation/screens/login_screen.dart';
@@ -7,7 +7,7 @@ import 'package:field_ops/features/auth/presentation/screens/sign_up_screen.dart
 import 'package:field_ops/layers/presentation/screens/home_screens/home_screen.dart';
 import 'package:field_ops/layers/presentation/screens/profile_screens/profile_screen.dart';
 import 'package:field_ops/layers/presentation/screens/schedule_screens/schedule_screen.dart';
-import 'package:field_ops/layers/presentation/screens/shell_/main_shell_router.dart';
+import 'package:field_ops/core/routes/shell_/main_shell_router.dart';
 import 'package:field_ops/layers/presentation/screens/task_screens/task_detail_screen.dart';
 import 'package:field_ops/layers/presentation/screens/task_screens/task_screen.dart';
 import 'package:go_router/go_router.dart';
