@@ -3,23 +3,23 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 //import '../helpers/constants.dart';
-//import '../helpers/shared_pref_helper.dart';a
+import '../helpers/shared_pref_helper.dart';
 
 // Interceptor to dynamically add Authorization header
-// class AuthInterceptor extends Interceptor {
-//   @override
-  // Future<void> onRequest(
-  //     RequestOptions options, RequestInterceptorHandler handler) async {
-  //   String? token =
-  //       await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
-  //   if (token.isNotEmpty) {
-  //     options.headers['Authorization'] = 'Bearer $token';
-  //   }
-  //   // It's good practice to ensure Content-Type and Accept are set if not base options.
-  //   // However, we'll set them as base options in DioGenerate.
-  //   return handler.next(options);
-  // }
-// }
+class AuthInterceptor extends Interceptor {
+  @override
+  Future<void> onRequest(
+      RequestOptions options, RequestInterceptorHandler handler) async {
+    String? token =
+        await SharedPrefHelper.getSecuredString(LocalStorageKeys.accessToken);
+    if (token.isNotEmpty) {
+      options.headers['Authorization'] = 'Bearer $token';
+    }
+    // It's good practice to ensure Content-Type and Accept are set if not base options.
+    // However, we'll set them as base options in DioGenerate.
+    return handler.next(options);
+  }
+}
 
 class DioGenerate {
   static Dio? _dio; // Renamed for convention
@@ -72,8 +72,8 @@ class DioGenerate {
 
   // Renamed and modified to include AuthInterceptor
   static void _addDioInterceptors() {
-    // _dio!.interceptors
-    //     .add(AuthInterceptor()); // Add our custom auth interceptor
+     _dio!.interceptors
+         .add(AuthInterceptor()); // Add our custom auth interceptor
     _dio!.interceptors.add(PrettyDioLogger(
       requestHeader: true,
       requestBody: true,

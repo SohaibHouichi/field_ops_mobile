@@ -18,4 +18,14 @@ Map<String, ShellRequirementModel> shellConfigRoute = {
     showFloatingButton: false,
     isMain: false,
   ),
+  schedulePagePath: ShellRequirementModel(
+    title: '',
+    showBottomNavigationBar: true,
+    showFloatingButton: false,
+  ),
+  profilePagePath: ShellRequirementModel(
+    title: '',
+    showBottomNavigationBar: true,
+    showFloatingButton: true,
+  ),
 };
