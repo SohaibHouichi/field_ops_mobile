@@ -25,7 +25,11 @@ class AuthCubit extends Cubit<AuthState> {
     isNotVisible = !isNotVisible;
     emit(AuthInitial());
   }
-   Future<void> checkAuthStatus() async {
+
+  UserEntity? get authenticatedUser =>
+      state is AuthAuthenticated ? (state as AuthAuthenticated).user : null;
+
+  Future<void> checkAuthStatus() async {
     emit(const AuthLoading());
     try {
       final user = await _getCurrentUserUseCase();
@@ -38,15 +42,20 @@ class AuthCubit extends Cubit<AuthState> {
       emit(const AuthUnauthenticated());
     }
   }
+
   Future<void> login({required String email, required String password}) async {
     emit(const AuthLoading());
     try {
       final user = await _loginUseCase(email: email, password: password);
       emit(AuthAuthenticated(user: user));
     } catch (e) {
-      emit(AuthError(message: 'Invalid email or password'));
+      final message = e.toString().contains('Access denied')
+          ? 'Access denied. Only Technicians and Customers are allowed.'
+          : 'Invalid email or password';
+      emit(AuthError(message: message));
     }
   }
+
   Future<void> logout() async {
     emit(const AuthLoading());
     await _logoutUseCase();

@@ -1,10 +1,21 @@
 import 'package:field_ops/features/auth/domain/entities/tenant_entity.dart';
+enum UserRole { technician, customer }
+
+extension UserRoleX on UserRole {
+  static UserRole? fromString(String? value) {
+    switch (value?.toLowerCase()) {
+      case 'technician': return UserRole.technician;
+      case 'customer':   return UserRole.customer;
+      default:           return null;
+    }
+  }
+}
 
 class UserEntity {
   final int userId;
   final String username;
   final String email;
-  final String role;
+  final UserRole role;
   final String accessToken;
   final TenantEntity tenantInfo;
 

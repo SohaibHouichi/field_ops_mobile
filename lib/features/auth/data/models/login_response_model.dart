@@ -27,12 +27,16 @@ class LoginResponseModel {
 
   Map<String, dynamic> toJson() => _$LoginResponseModelToJson(this);
 
-   UserEntity toEntity() => UserEntity(
-        userId: userId,
-        username: username,
-        email: email,
-        role: role,
-        accessToken: accessToken,
-        tenantInfo: tenantInfo.toEntity(),
-      );
+  UserEntity? toEntity() {
+     final parsedRole = UserRoleX.fromString(role);
+    if (parsedRole == null) return null; 
+    return UserEntity(
+      userId: userId,
+      username: username,
+      email: email,
+      role: parsedRole,
+      accessToken: accessToken,
+      tenantInfo: tenantInfo.toEntity(),
+    );
+  }
 }

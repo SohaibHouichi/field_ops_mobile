@@ -23,8 +23,15 @@ class AuthRepositoryImpl implements AuthRepository {
     final LoginResponseModel response = await remoteDataSource.login(
       loginRequest,
     );
+    final user = response.toEntity();
+    if (user == null) {
+      throw Exception(
+        'Access denied. Role "${response.role}" is not authorized.',
+      );
+    }
+
     await localDataSource.cacheUser(response);
-    return response.toEntity();
+    return user;
   }
 
   @override
