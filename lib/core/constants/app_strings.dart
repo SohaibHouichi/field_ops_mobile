@@ -14,6 +14,6 @@ const String validationRequired = 'Entered value is required';
 const String forgotPassword = 'Forgot password?';
 const String signIn = 'Sign In';
 
-const String noAccount = "Don't have an account? ";
-const String requestAccess = 'Request Access';
+const String noAccount = "Do you have any assets to repair? ";
+const String requestAccess = 'request access';
 // ------------- END LOGIN STRINGS -------------

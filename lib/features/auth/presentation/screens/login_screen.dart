@@ -2,7 +2,7 @@ import 'package:field_ops/core/constants/app_color.dart';
 import 'package:field_ops/core/constants/app_router.dart';
 import 'package:field_ops/core/constants/app_strings.dart';
 import 'package:field_ops/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:field_ops/features/auth/presentation/widgets/field_widget.dart';
+import 'package:field_ops/core/widgets/field_widget.dart';
 import 'package:field_ops/core/widgets/pulse_dot_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

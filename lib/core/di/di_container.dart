@@ -3,6 +3,7 @@ import 'package:field_ops/features/auth/auth_injection.dart';
 import 'package:field_ops/core/di/home_injection.dart';
 import 'package:field_ops/core/di/shell_injection.dart';
 import 'package:field_ops/core/helpers/dio_generate.dart';
+import 'package:field_ops/features/customer/customer_injection.dart';
 import 'package:get_it/get_it.dart';
 
 class DiContainer {
@@ -15,6 +16,7 @@ class DiContainer {
  
     setupAuth(getIt);
     setupShell(getIt);
+    setupCustomers(getIt);
     setupHome(getIt);
   }
 }

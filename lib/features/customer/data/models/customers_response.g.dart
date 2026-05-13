@@ -1,0 +1,35 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'customers_response.dart';
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+CustomersResponse _$CustomersResponseFromJson(Map<String, dynamic> json) =>
+    CustomersResponse(
+      id: (json['id'] as num).toInt(),
+      fullName: json['fullName'] as String,
+      gender: $enumDecode(_$GenderEnumMap, json['gender']),
+      birthDate: DateTime.parse(json['birthDate'] as String),
+      email: json['email'] as String,
+      phoneNumber: json['phoneNumber'] as String,
+      note: json['note'] as String?,
+      addressId: json['addressId'] as String?,
+      addressLabel: json['addressLabel'] as String?,
+    );
+
+Map<String, dynamic> _$CustomersResponseToJson(CustomersResponse instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'fullName': instance.fullName,
+      'gender': _$GenderEnumMap[instance.gender]!,
+      'birthDate': instance.birthDate.toIso8601String(),
+      'email': instance.email,
+      'phoneNumber': instance.phoneNumber,
+      'note': instance.note,
+      'addressId': instance.addressId,
+      'addressLabel': instance.addressLabel,
+    };
+
+const _$GenderEnumMap = {Gender.male: 'male', Gender.female: 'female'};

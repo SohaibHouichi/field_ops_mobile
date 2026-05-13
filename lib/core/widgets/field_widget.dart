@@ -8,6 +8,8 @@ class Field extends StatelessWidget {
   final bool obscureText;
   final String? Function(String?)? validator;
   final Widget? suffix;
+  final int? maxLines;
+  final TextInputType? inputType;
 
   const Field({super.key, 
     required this.label,
@@ -17,6 +19,8 @@ class Field extends StatelessWidget {
     this.obscureText = false,
     this.validator,
     this.suffix,
+    this.maxLines = 1,
+    this.inputType = .text,
   });
 
   @override
@@ -37,6 +41,8 @@ class Field extends StatelessWidget {
         TextFormField(
           controller: controller,
           obscureText: obscureText,
+          maxLines: maxLines,
+          keyboardType: inputType,
           validator: validator,
           style: const TextStyle(color: primaryText, fontSize: 14),
           decoration: InputDecoration(

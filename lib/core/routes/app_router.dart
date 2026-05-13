@@ -1,9 +1,10 @@
 import 'package:field_ops/core/constants/app_router.dart';
 import 'package:field_ops/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:field_ops/features/customer/presentation/cubit/customer_cubit.dart';
 import 'package:field_ops/layers/business_logic/cubit/Home/home_cubit.dart';
 import 'package:field_ops/features/auth/presentation/screens/login_screen.dart';
 import 'package:field_ops/features/auth/presentation/screens/password_restoring_screen.dart';
-import 'package:field_ops/features/auth/presentation/screens/sign_up_screen.dart';
+import 'package:field_ops/features/customer/presentation/screens/customer_signup_screen.dart';
 import 'package:field_ops/layers/presentation/screens/home_screens/home_screen.dart';
 import 'package:field_ops/layers/presentation/screens/profile_screens/profile_screen.dart';
 import 'package:field_ops/layers/presentation/screens/schedule_screens/schedule_screen.dart';
@@ -17,6 +18,7 @@ import '../di/di_container.dart';
 
 GoRouter _buildRouter() {
   final authCubit = DiContainer.getIt<AuthCubit>();
+  final customerCubit = DiContainer.getIt<CustomerCubit>();
 
   authCubit.checkAuthStatus(); // called once only
 
@@ -51,7 +53,10 @@ GoRouter _buildRouter() {
       GoRoute(
         path: signUpPagePath,
         name: signUpPageName,
-        builder: (context, state) => const SignUpScreen(),
+        builder: (context, state) => BlocProvider.value(
+          value: customerCubit, // no checkAuthStatus() here
+          child: const CustomerSignUpScreen(),
+        ),
       ),
 
       GoRoute(
