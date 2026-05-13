@@ -18,6 +18,8 @@ import '../di/di_container.dart';
 GoRouter _buildRouter() {
   final authCubit = DiContainer.getIt<AuthCubit>();
 
+  authCubit.checkAuthStatus(); // called once only
+
   return GoRouter(
     debugLogDiagnostics: true,
     initialLocation: loginPagePath,
@@ -27,11 +29,11 @@ GoRouter _buildRouter() {
       final authState = authCubit.state;
       final location = state.matchedLocation;
 
-      //  wait for a decisive state
+      // wait for a decisive state
       if (authState is AuthLoading || authState is AuthInitial) return null;
 
       final isPublic = location == loginPagePath ||
-          location.startsWith(passwordRestoreName) ||
+          location == passwordRestorePath ||
           location == signUpPagePath;
 
       // not authenticated → force login
@@ -56,7 +58,7 @@ GoRouter _buildRouter() {
         path: loginPagePath,
         name: loginPageName,
         builder: (context, state) => BlocProvider.value(
-          value: authCubit..checkAuthStatus(),
+          value: authCubit, // no checkAuthStatus() here
           child: const LoginScreen(),
         ),
         routes: [
