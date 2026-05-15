@@ -17,7 +17,7 @@ class FieldOPS extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => DiContainer.getIt<AuthCubit>(),
+      create: (_) => DiContainer.getIt<AuthCubit>()..checkAuthStatus(),
       child: const _App(),
     );
   }

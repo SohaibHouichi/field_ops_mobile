@@ -2,6 +2,8 @@ import 'package:field_ops/core/constants/app_color.dart';
 import 'package:field_ops/core/constants/app_router.dart';
 import 'package:field_ops/core/di/di_container.dart';
 import 'package:field_ops/core/navigation/nav_items_config.dart';
+import 'package:field_ops/core/widgets/pulse_dot_widget.dart';
+import 'package:field_ops/features/auth/domain/entities/user_entity.dart';
 import 'package:field_ops/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,7 +26,7 @@ class MainShellRouter extends StatelessWidget {
     final username = authState is AuthAuthenticated
         ? authState.user.username
         : 'User';
-    final role = authState is AuthAuthenticated ? authState.user.role : '';
+    final role = authState is AuthAuthenticated ? UserRoleX.toStringValue(authState.user.role) : '';
     final navItems = role == 'technician'
         ? TechnicianNavItems.items
         : CustomerNavItems.items;
@@ -49,7 +51,7 @@ class MainShellRouter extends StatelessWidget {
                       radius: 24,
                       backgroundColor: primaryBlue,
                       child: Text(
-                        'Ops'.substring(0, 3),
+                        username.substring(0, 3).toUpperCase(),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
@@ -72,17 +74,21 @@ class MainShellRouter extends StatelessWidget {
                     border: Border.all(color: chipBorder),
                   ),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        username.toUpperCase(),
-                        style: const TextStyle(
-                           color: primaryBlue,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 2,
-                        ),
+                      Row(
+                        children: [
+                          PulseDot(),
+                          const SizedBox(width: 6),
+                          Text(
+                            username.toUpperCase(),
+                            style: const TextStyle(
+                              color: primaryBlue,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                        ],
                       ),
                       Text(
                         tenantName.toUpperCase(),

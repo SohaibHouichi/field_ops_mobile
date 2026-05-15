@@ -9,6 +9,12 @@ extension UserRoleX on UserRole {
       default:           return null;
     }
   }
+  static String toStringValue(UserRole role) {
+    switch (role) {
+      case UserRole.technician: return 'technician';
+      case UserRole.customer:   return 'customer';
+    }
+  }
 }
 
 class UserEntity {
