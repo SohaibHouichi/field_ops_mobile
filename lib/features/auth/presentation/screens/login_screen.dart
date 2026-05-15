@@ -1,6 +1,7 @@
 import 'package:field_ops/core/constants/app_color.dart';
 import 'package:field_ops/core/constants/app_router.dart';
 import 'package:field_ops/core/constants/app_strings.dart';
+import 'package:field_ops/features/auth/domain/entities/user_entity.dart';
 import 'package:field_ops/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:field_ops/core/widgets/field_widget.dart';
 import 'package:field_ops/core/widgets/pulse_dot_widget.dart';
@@ -25,7 +26,11 @@ class LoginScreen extends StatelessWidget {
         body: BlocListener<AuthCubit, AuthState>(
           listener: (context, state) {
             if (state is AuthAuthenticated) {
-              context.go(homePagePath);
+              if (state.user.role == UserRole.technician) {
+                context.go(technicianHomePagePath);
+              } else if (state.user.role == UserRole.customer) {
+                context.go(customerHomePagePath);
+              }
             }
           },
           child: SafeArea(

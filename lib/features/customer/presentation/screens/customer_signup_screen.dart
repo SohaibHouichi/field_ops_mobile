@@ -57,7 +57,7 @@ class CustomerSignUpScreen extends StatelessWidget {
         body: BlocListener<CustomerCubit, CustomerState>(
           listener: (context, state) {
             if (state is CustomerSuccess) {
-              context.go(homePagePath);
+              context.go(customerHomePagePath);
             }
           },
           child: SafeArea(

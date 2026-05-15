@@ -2,7 +2,12 @@ import 'package:field_ops/core/constants/app_router.dart';
 import 'package:field_ops/core/routes/shell_/shell_requirement_model.dart';
 
 Map<String, ShellRequirementModel> shellConfigRoute = {
-  homePagePath: ShellRequirementModel(
+  customerHomePagePath: ShellRequirementModel(
+    title: '',
+    showBottomNavigationBar: true,
+    showFloatingButton: false,
+  ),
+  technicianHomePagePath: ShellRequirementModel(
     title: '',
     showBottomNavigationBar: true,
     showFloatingButton: false,

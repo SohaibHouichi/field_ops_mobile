@@ -1,11 +1,13 @@
 import 'package:field_ops/core/constants/app_router.dart';
+import 'package:field_ops/features/auth/domain/entities/user_entity.dart';
 import 'package:field_ops/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:field_ops/features/customer/presentation/cubit/customer_cubit.dart';
+import 'package:field_ops/features/customer/presentation/screens/customer_dashboard_screen.dart';
+import 'package:field_ops/features/technician/presentation/screens/technician_dashboard_screen.dart';
 import 'package:field_ops/layers/business_logic/cubit/Home/home_cubit.dart';
 import 'package:field_ops/features/auth/presentation/screens/login_screen.dart';
 import 'package:field_ops/features/auth/presentation/screens/password_restoring_screen.dart';
 import 'package:field_ops/features/customer/presentation/screens/customer_signup_screen.dart';
-import 'package:field_ops/layers/presentation/screens/home_screens/home_screen.dart';
 import 'package:field_ops/layers/presentation/screens/profile_screens/profile_screen.dart';
 import 'package:field_ops/layers/presentation/screens/schedule_screens/schedule_screen.dart';
 import 'package:field_ops/core/routes/shell_/main_shell_router.dart';
@@ -29,25 +31,37 @@ GoRouter _buildRouter() {
       final authState = authCubit.state;
       final location = state.matchedLocation;
 
-      // ── wait for decisive state ──────────────────────────────────
       if (authState is AuthInitial || authState is AuthLoading) return null;
 
       final isPublic = location == loginPagePath ||
           location == passwordRestorePath ||
           location == signUpPagePath;
 
-      // ── not authenticated → force login ─────────────────────────
       if (authState is! AuthAuthenticated) {
         return isPublic ? null : loginPagePath;
       }
 
-      // ── authenticated on public page → go home ───────────────────
-      if (isPublic) return homePagePath;
+      // ── authenticated on public page → redirect by role ──────────
+      if (isPublic) {
+        return authCubit.authenticatedUser?.role == UserRole.technician
+            ? technicianHomePagePath
+            : customerHomePagePath;
+      }
+
+      // ── guard cross-role access ───────────────────────────────────
+      final isTechnician =
+          authCubit.authenticatedUser?.role == UserRole.technician;
+      final isCustomerRoute = location.startsWith('/customer');
+      final isTechnicianRoute = location.startsWith('/technician');
+
+      if (isTechnician && isCustomerRoute) return technicianHomePagePath;
+      if (!isTechnician && isTechnicianRoute) return customerHomePagePath;
 
       return null;
     },
 
     routes: [
+      // ── Public routes ─────────────────────────────────────────────
       GoRoute(
         path: signUpPagePath,
         name: signUpPageName,
@@ -56,11 +70,10 @@ GoRouter _buildRouter() {
           child: const CustomerSignUpScreen(),
         ),
       ),
-
       GoRoute(
         path: loginPagePath,
         name: loginPageName,
-        builder: (context, state) => LoginScreen(),
+        builder: (context, state) => const LoginScreen(),
         routes: [
           GoRoute(
             path: passwordRestoreName,
@@ -70,6 +83,7 @@ GoRouter _buildRouter() {
         ],
       ),
 
+      // ── Customer shell ────────────────────────────────────────────
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) => MainShellRouter(
           navigationShell: navigationShell,
@@ -78,11 +92,56 @@ GoRouter _buildRouter() {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: homePagePath,
-                name: homePageName,
+                path: customerHomePagePath,      // e.g. '/customer/home'
+                name: customerHomePageName,
+                builder: (context, state) => const CustomerDashboard(),
+              ),
+            ],
+          ),
+          // StatefulShellBranch(
+          //   routes: [
+          //     GoRoute(
+          //       path: customerRequestsPagePath,  // e.g. '/customer/requests'
+          //       name: customerRequestsPageName,
+          //       builder: (context, state) => const CustomerRequestsScreen(),
+          //     ),
+          //   ],
+          // ),
+          // StatefulShellBranch(
+          //   routes: [
+          //     GoRoute(
+          //       path: customerAssetsPagePath,    // e.g. '/customer/assets'
+          //       name: customerAssetsPageName,
+          //       builder: (context, state) => const CustomerAssetsScreen(),
+          //     ),
+          //   ],
+          // ),
+          // StatefulShellBranch(
+          //   routes: [
+          //     GoRoute(
+          //       path: customerProfilePagePath,  // e.g. '/customer/profile'
+          //       name: customerProfilePageName,
+          //       builder: (context, state) => const ProfileScreen(),
+          //     ),
+          //   ],
+          // ),
+        ],
+      ),
+
+      // ── Technician shell ──────────────────────────────────────────
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) => MainShellRouter(
+          navigationShell: navigationShell,
+        ),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: technicianHomePagePath,    // e.g. '/technician/home'
+                name: technicianHomePageName,
                 builder: (context, state) => BlocProvider(
                   create: (_) => DiContainer.getIt<HomeCubit>(),
-                  child: HomeScreen(),
+                  child: const TechnicianDashboard(),
                 ),
               ),
             ],
@@ -90,14 +149,14 @@ GoRouter _buildRouter() {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: taskPagePath,
+                path: taskPagePath,              // e.g. '/technician/tasks'
                 name: taskPageName,
-                builder: (context, state) => TaskScreen(),
+                builder: (context, state) => const ServiceRequest(),
                 routes: [
                   GoRoute(
                     path: taskDetailName,
                     name: taskDetailName,
-                    builder: (context, state) => TaskDetailScreen(),
+                    builder: (context, state) => const TaskDetailScreen(),
                   ),
                 ],
               ),
@@ -106,18 +165,18 @@ GoRouter _buildRouter() {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: schedulePagePath,
+                path: schedulePagePath,          // e.g. '/technician/schedule'
                 name: schedulePageName,
-                builder: (context, state) => ScheduleScreen(),
+                builder: (context, state) => const ScheduleScreen(),
               ),
             ],
           ),
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: profilePagePath,
+                path: profilePagePath, // e.g. '/technician/profile'
                 name: profilePageName,
-                builder: (context, state) => ProfileScreen(),
+                builder: (context, state) => const ProfileScreen(),
               ),
             ],
           ),
@@ -126,7 +185,6 @@ GoRouter _buildRouter() {
     ],
   );
 }
-
 final GoRouter appRouter = _buildRouter();
 
 class _AuthStateListenable extends ChangeNotifier {
