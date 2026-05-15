@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'package:field_ops/core/constants/app_color.dart';
 import 'package:field_ops/core/constants/app_router.dart';
 import 'package:field_ops/core/di/di_container.dart';
+import 'package:field_ops/core/helpers/shared_pref_helper.dart';
 import 'package:field_ops/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:field_ops/core/widgets/pulse_dot_widget.dart';
+// import 'package:field_ops/core/widgets/pulse_dot_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -31,30 +33,57 @@ class MainShellRouter extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
             children: [
+              config.isMain ? CircleAvatar(
+                        radius: 24,
+                        backgroundColor: primaryBlue,
+                        child: Text(
+                          'Ops'.substring(0, 3),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ) : const SizedBox.shrink(),
               // Left — avatar OR back button
               if (config.isMain)
                 // Same chip style as login logo chip
                 Container(
+                  margin: const EdgeInsets.only(left: 8),
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 6),
+                    horizontal: 10,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: chipBg,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: chipBorder),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      PulseDot(),
-                      SizedBox(width: 8),
-                      Text(
-                        'FieldOPS',
-                        style: TextStyle(
-                          color: primaryBlue,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 2,
+                      FutureBuilder<Object>(
+                        future: SharedPrefHelper.getObject(
+                          LocalStorageKeys.tenantInfo,
                         ),
+                        builder: (context, snapshot) {
+                          final raw = snapshot.data;
+                          final tenantName = raw is String && raw.isNotEmpty
+                              ? (jsonDecode(raw)
+                                            as Map<String, dynamic>)['name']
+                                        as String? ??
+                                    'FIELDOPS'
+                              : 'FIELDOPS';
+                          return Text(
+                            tenantName.toUpperCase(),
+                            style: TextStyle(
+                              color: primaryBlue,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 2,
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -64,7 +93,9 @@ class MainShellRouter extends StatelessWidget {
                   onTap: () => context.go(taskPagePath),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 6),
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: chipBg,
                       borderRadius: BorderRadius.circular(8),
@@ -73,8 +104,11 @@ class MainShellRouter extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.arrow_back_ios_new,
-                            size: 12, color: primaryBlue),
+                        Icon(
+                          Icons.arrow_back_ios_new,
+                          size: 12,
+                          color: primaryBlue,
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           config.title,
@@ -102,8 +136,11 @@ class MainShellRouter extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: inputBorder),
                     ),
-                    child: const Icon(Icons.settings_outlined,
-                        size: 18, color: primaryText),
+                    child: const Icon(
+                      Icons.settings_outlined,
+                      size: 18,
+                      color: primaryText,
+                    ),
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -124,13 +161,15 @@ class MainShellRouter extends StatelessWidget {
                       value: 'feedback',
                       child: Row(
                         children: [
-                          Icon(Icons.feedback_outlined,
-                              size: 16, color: secondaryText),
+                          Icon(
+                            Icons.feedback_outlined,
+                            size: 16,
+                            color: secondaryText,
+                          ),
                           const SizedBox(width: 10),
                           Text(
                             'Report feedback',
-                            style: TextStyle(
-                                color: primaryText, fontSize: 13),
+                            style: TextStyle(color: primaryText, fontSize: 13),
                           ),
                         ],
                       ),
@@ -140,8 +179,11 @@ class MainShellRouter extends StatelessWidget {
                       value: 'logout',
                       child: Row(
                         children: [
-                          Icon(Icons.logout,
-                              size: 16, color: Color(0xFFFF6B6B)),
+                          Icon(
+                            Icons.logout,
+                            size: 16,
+                            color: Color(0xFFFF6B6B),
+                          ),
                           SizedBox(width: 10),
                           Text(
                             'Logout',
@@ -176,10 +218,14 @@ class MainShellRouter extends StatelessWidget {
                 selectedItemColor: primaryBlue,
                 unselectedItemColor: secondaryText,
                 currentIndex: navigationShell.currentIndex,
-                unselectedLabelStyle:
-                    TextStyle(color: secondaryText, fontSize: 10),
+                unselectedLabelStyle: TextStyle(
+                  color: secondaryText,
+                  fontSize: 10,
+                ),
                 selectedLabelStyle: const TextStyle(
-                    fontWeight: FontWeight.w600, fontSize: 10),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 10,
+                ),
                 backgroundColor: Colors.transparent,
                 elevation: 0,
                 onTap: (value) {
@@ -190,21 +236,25 @@ class MainShellRouter extends StatelessWidget {
                 },
                 items: const [
                   BottomNavigationBarItem(
-                      icon: Icon(Icons.home_outlined),
-                      activeIcon: Icon(Icons.home),
-                      label: 'Home'),
+                    icon: Icon(Icons.home_outlined),
+                    activeIcon: Icon(Icons.home),
+                    label: 'Home',
+                  ),
                   BottomNavigationBarItem(
-                      icon: Icon(Icons.list_alt_outlined),
-                      activeIcon: Icon(Icons.list_alt),
-                      label: 'Requests'),
+                    icon: Icon(Icons.list_alt_outlined),
+                    activeIcon: Icon(Icons.list_alt),
+                    label: 'Requests',
+                  ),
                   BottomNavigationBarItem(
-                      icon: Icon(Icons.calendar_month_outlined),
-                      activeIcon: Icon(Icons.calendar_month),
-                      label: 'Schedule'),
+                    icon: Icon(Icons.calendar_month_outlined),
+                    activeIcon: Icon(Icons.calendar_month),
+                    label: 'Schedule',
+                  ),
                   BottomNavigationBarItem(
-                      icon: Icon(Icons.person_outline),
-                      activeIcon: Icon(Icons.person),
-                      label: 'Profile'),
+                    icon: Icon(Icons.person_outline),
+                    activeIcon: Icon(Icons.person),
+                    label: 'Profile',
+                  ),
                 ],
               ),
             )

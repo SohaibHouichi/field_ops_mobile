@@ -54,9 +54,9 @@ class SharedPrefHelper {
 
   /// get a object value from SharedPreferences with given [key].
   static Future<Object> getObject(String key) async {
-    debugPrint('SharedPrefHelper : getBool with key : $key');
+    debugPrint('SharedPrefHelper : getObject with key : $key');
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    return sharedPreferences.get(key) ?? false;
+    return sharedPreferences.get(key) ?? '';
   }
 
   /// Gets a bool value from SharedPreferences with given [key].
