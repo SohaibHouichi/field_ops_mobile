@@ -1,26 +1,26 @@
 import 'package:field_ops/core/constants/app_router.dart';
+import 'package:field_ops/core/di/di_container.dart';
+import 'package:field_ops/core/routes/shell_/main_shell_router.dart';
 import 'package:field_ops/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:field_ops/features/customer/presentation/cubit/customer_cubit.dart';
-import 'package:field_ops/layers/business_logic/cubit/Home/home_cubit.dart';
 import 'package:field_ops/features/auth/presentation/screens/login_screen.dart';
 import 'package:field_ops/features/auth/presentation/screens/password_restoring_screen.dart';
+import 'package:field_ops/features/customer/presentation/cubit/customer_cubit.dart';
 import 'package:field_ops/features/customer/presentation/screens/customer_signup_screen.dart';
+import 'package:field_ops/layers/business_logic/cubit/Home/home_cubit.dart';
 import 'package:field_ops/layers/presentation/screens/home_screens/home_screen.dart';
 import 'package:field_ops/layers/presentation/screens/profile_screens/profile_screen.dart';
 import 'package:field_ops/layers/presentation/screens/schedule_screens/schedule_screen.dart';
-import 'package:field_ops/core/routes/shell_/main_shell_router.dart';
 import 'package:field_ops/layers/presentation/screens/task_screens/task_detail_screen.dart';
 import 'package:field_ops/layers/presentation/screens/task_screens/task_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../di/di_container.dart';
+import 'package:go_router/go_router.dart';
 
 GoRouter _buildRouter() {
   final authCubit = DiContainer.getIt<AuthCubit>();
   final customerCubit = DiContainer.getIt<CustomerCubit>();
 
-  authCubit.checkAuthStatus(); // called once only
+  authCubit.checkAuthStatus();
 
   return GoRouter(
     debugLogDiagnostics: true,
@@ -31,7 +31,7 @@ GoRouter _buildRouter() {
       final authState = authCubit.state;
       final location = state.matchedLocation;
 
-      // wait for a decisive state
+      // wait for decisive state
       if (authState is AuthLoading || authState is AuthInitial) return null;
 
       final isPublic = location == loginPagePath ||
@@ -43,8 +43,20 @@ GoRouter _buildRouter() {
         return isPublic ? null : loginPagePath;
       }
 
-      // authenticated on public page → go home
-      if (isPublic) return homePagePath;
+      // authenticated on public page → redirect to role home
+      if (isPublic) {
+        final role = authState.user.role;
+        return role == 'technician' ? homePagePath : homePagePath;
+      }
+
+      // role crossing guard
+      final role = authState.user.role;
+      if (role == 'technician' && location.startsWith('/customer')) {
+        return homePagePath;
+      }
+      if (role == 'customer' && location.startsWith('/technician')) {
+        return homePagePath;
+      }
 
       return null;
     },
@@ -54,7 +66,7 @@ GoRouter _buildRouter() {
         path: signUpPagePath,
         name: signUpPageName,
         builder: (context, state) => BlocProvider.value(
-          value: customerCubit, // no checkAuthStatus() here
+          value: customerCubit,
           child: const CustomerSignUpScreen(),
         ),
       ),
@@ -62,10 +74,7 @@ GoRouter _buildRouter() {
       GoRoute(
         path: loginPagePath,
         name: loginPageName,
-        builder: (context, state) => BlocProvider.value(
-          value: authCubit, // no checkAuthStatus() here
-          child: const LoginScreen(),
-        ),
+        builder: (context, state) => const LoginScreen(),
         routes: [
           GoRoute(
             path: passwordRestoreName,
@@ -75,62 +84,54 @@ GoRouter _buildRouter() {
         ],
       ),
 
-      ShellRoute(
-        builder: (context, state, child) => BlocProvider.value(
-          value: authCubit,
-          child: child,
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) => MainShellRouter(
+          navigationShell: navigationShell,
         ),
-        routes: [
-          StatefulShellRoute.indexedStack(
-            builder: (context, state, navigationShell) => MainShellRouter(
-              navigationShell: navigationShell,
-            ),
-            branches: [
-              StatefulShellBranch(
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: homePagePath,
+                name: homePageName,
+                builder: (context, state) => BlocProvider(
+                  create: (_) => DiContainer.getIt<HomeCubit>(),
+                  child: HomeScreen(),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: taskPagePath,
+                name: taskPageName,
+                builder: (context, state) => TaskScreen(),
                 routes: [
                   GoRoute(
-                    path: homePagePath,
-                    name: homePageName,
-                    builder: (context, state) => BlocProvider(
-                      create: (_) => DiContainer.getIt<HomeCubit>(),
-                      child: HomeScreen(),
-                    ),
+                    path: taskDetailName,
+                    name: taskDetailName,
+                    builder: (context, state) => TaskDetailScreen(),
                   ),
                 ],
               ),
-              StatefulShellBranch(
-                routes: [
-                  GoRoute(
-                    path: taskPagePath,
-                    name: taskPageName,
-                    builder: (context, state) => TaskScreen(),
-                    routes: [
-                      GoRoute(
-                        path: taskDetailName,
-                        name: taskDetailName,
-                        builder: (context, state) => TaskDetailScreen(),
-                      ),
-                    ],
-                  ),
-                ],
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: schedulePagePath,
+                name: schedulePageName,
+                builder: (context, state) => ScheduleScreen(),
               ),
-              StatefulShellBranch(
-                routes: [
-                  GoRoute(
-                    path: schedulePagePath,
-                    name: schedulePageName,
-                    builder: (context, state) => ScheduleScreen(),
-                  ),
-                ],
-              ),
-              StatefulShellBranch(
-                routes: [
-                  GoRoute(
-                    path: profilePagePath,
-                    name: profilePageName,
-                    builder: (context, state) => ProfileScreen(),
-                  ),
-                ],
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: profilePagePath,
+                name: profilePageName,
+                builder: (context, state) => ProfileScreen(),
               ),
             ],
           ),
@@ -142,7 +143,6 @@ GoRouter _buildRouter() {
 
 final GoRouter appRouter = _buildRouter();
 
-// ── Notifies GoRouter to re-evaluate redirect on every auth state change ──
 class _AuthStateListenable extends ChangeNotifier {
   _AuthStateListenable(AuthCubit cubit) {
     cubit.stream.listen((_) => notifyListeners());
