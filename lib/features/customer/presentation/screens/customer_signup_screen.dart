@@ -46,7 +46,7 @@ class CustomerSignUpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Local mutable state lives here — no StatefulWidget needed
+
     Gender? selectedGender;
     DateTime? selectedBirthDate;
 

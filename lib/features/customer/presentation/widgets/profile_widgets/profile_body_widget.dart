@@ -1,9 +1,13 @@
 import 'package:field_ops/core/constants/app_color.dart';
+import 'package:field_ops/core/constants/app_router.dart';
 import 'package:field_ops/core/enums/gender_enum.dart';
+import 'package:field_ops/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:field_ops/features/customer/domain/entities/customer_entity.dart';
 import 'package:field_ops/features/customer/presentation/widgets/profile_widgets/info_card_widget.dart';
 import 'package:field_ops/features/customer/presentation/widgets/profile_widgets/info_row_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 class ProfileBody extends StatelessWidget {
@@ -17,7 +21,8 @@ class ProfileBody extends StatelessWidget {
         : parts.first.substring(0, 2).toUpperCase();
   }
 
-  String get _genderLabel => Gender.fromInt(customer.gender) == Gender.male ? 'Male' : 'Female';
+  String get _genderLabel =>
+      Gender.fromInt(customer.gender) == Gender.male ? 'Male' : 'Female';
 
   String get _birthDate => customer.birthDate != null
       ? DateFormat('MMM dd, yyyy').format(customer.birthDate!)
@@ -25,14 +30,13 @@ class ProfileBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final logout = context.read<AuthCubit>().logout;
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           // ── Logo chip ──────────────────────────────────────────────
-       
           const SizedBox(height: 28),
 
           // ── Headline ───────────────────────────────────────────────
@@ -202,6 +206,62 @@ class ProfileBody extends StatelessWidget {
           ],
 
           const SizedBox(height: 32),
+          // ── Action buttons ─────────────────────────────────────────
+          Container(
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: inputBorder),
+            ),
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                const Text(
+                  'LOGOUT',
+                  style: TextStyle(
+                    color: secondaryText,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Divider(color: inputBorder, height: 1),
+                const SizedBox(height: 16),
+                // Logout button
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      logout();
+                      if (context.mounted) {
+                        context.go(loginPagePath);
+                      }
+                    },
+                    icon: const Icon(Icons.logout_rounded, size: 18),
+                    label: const Text(
+                      'Logout',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red,
+                      side: BorderSide(color: Colors.red.withOpacity(0.4)),
+                      backgroundColor: Colors.red.withOpacity(0.07),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

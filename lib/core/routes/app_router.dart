@@ -106,7 +106,7 @@ GoRouter _buildRouter() {
               GoRoute(
                 path: customerRequestsPagePath,  // e.g. '/customer/requests'
                 name: customerRequestsPageName,
-                builder: (context, state) => const CustomerServiceRequests(),
+                builder: (context, state) =>  CustomerServiceRequests(),
               ),
             ],
           ),

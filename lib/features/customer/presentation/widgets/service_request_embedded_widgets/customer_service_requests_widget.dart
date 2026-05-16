@@ -1,23 +1,36 @@
-// lib/features/customer/presentation/widgets/customer_service_requests_widget.dart
-
+import 'package:field_ops/core/config/status_config.dart';
 import 'package:field_ops/core/constants/app_color.dart';
+import 'package:field_ops/core/constants/app_router.dart';
 import 'package:field_ops/features/customer/domain/entities/embedded/service_request_embedded_entity.dart';
 import 'package:field_ops/features/customer/presentation/cubit/customer_cubit.dart';
 import 'package:field_ops/features/customer/presentation/widgets/dashboard_widgets/loading_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 class CustomerServiceRequestsWidget extends StatelessWidget {
   final List<ServiceRequestEmbeddedEntity> serviceRequests;
-  const CustomerServiceRequestsWidget({super.key, required this.serviceRequests});
 
+  const CustomerServiceRequestsWidget({
+    super.key,
+    required this.serviceRequests,
+  });
+
+  static const int _previewLimit = 3;
+
+  @override
   Widget build(BuildContext context) {
     return BlocBuilder<CustomerCubit, CustomerState>(
       builder: (context, state) {
         if (state is CustomerLoading || state is CustomerInitial) {
-          return ServiceRequestSkeleton();
+          return const ServiceRequestSkeleton();
         }
+
+        final preview = serviceRequests.take(_previewLimit).toList();
+        final hasMore = serviceRequests.length > _previewLimit;
+        final remaining = serviceRequests.length - _previewLimit;
+
         return Container(
           decoration: BoxDecoration(
             color: cardBg,
@@ -28,7 +41,7 @@ class CustomerServiceRequestsWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Header ────────────────────────────────────────────
+              // ── Header ──────────────────────────────────────────
               Row(
                 children: [
                   const Icon(Icons.receipt_long_outlined,
@@ -54,6 +67,7 @@ class CustomerServiceRequestsWidget extends StatelessWidget {
                   ),
                 ],
               ),
+
               if (serviceRequests.isEmpty) ...[
                 const SizedBox(height: 16),
                 const Center(
@@ -64,7 +78,16 @@ class CustomerServiceRequestsWidget extends StatelessWidget {
                 ),
               ] else ...[
                 const SizedBox(height: 16),
-                ...serviceRequests.map((sr) => _ServiceRequestItem(sr: sr)),
+                ...preview.map((sr) => _ServiceRequestItem(sr: sr)),
+
+                // ── View more ──────────────────────────────────────
+                if (hasMore) ...[
+                  const SizedBox(height: 4),
+                  _ViewMoreButton(
+                    remaining: remaining,
+                    onTap: () => context.go(customerRequestsPagePath),
+                  ),
+                ],
               ],
             ],
           ),
@@ -74,106 +97,146 @@ class CustomerServiceRequestsWidget extends StatelessWidget {
   }
 }
 
+// ── Service request item ──────────────────────────────────────────────────────
+
 class _ServiceRequestItem extends StatelessWidget {
   final ServiceRequestEmbeddedEntity sr;
   const _ServiceRequestItem({required this.sr});
 
-  Color get _statusColor => switch (sr.status) {
-        1 => const Color(0xFF4CAF50),  // open
-        2 => const Color(0xFFFF9800),  // in progress
-        3 => const Color(0xFF2196F3),  // completed
-        _ => secondaryText,
-      };
-
-  String get _statusLabel => switch (sr.status) {
-        1 => 'Open',
-        2 => 'In Progress',
-        3 => 'Completed',
-        _ => 'Unknown',
-      };
-
   @override
   Widget build(BuildContext context) {
+    final status = ServiceRequestStatus.fromInt(sr.status);
+    final color  = status.color;
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: inputBorder),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
+          // ── Status icon dot ────────────────────────────────────
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(status.icon, color: color, size: 14),
+          ),
+
+          const SizedBox(width: 10),
+
+          // ── Title + reference ──────────────────────────────────
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
                   sr.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: primaryText,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              // ── Status badge ──────────────────────────────────
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: _statusColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: _statusColor.withOpacity(0.3)),
-                ),
-                child: Text(
-                  _statusLabel,
-                  style: TextStyle(
-                    color: _statusColor,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
+                const SizedBox(height: 2),
+                Text(
+                  sr.reference,
+                  style: const TextStyle(
+                    color: secondaryText,
+                    fontSize: 10,
+                    fontFamily: 'monospace',
+                    letterSpacing: 0.5,
                   ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Text(
-                sr.reference,
-                style: const TextStyle(
-                  color: secondaryText,
-                  fontSize: 11,
-                  fontFamily: 'monospace',
-                ),
-              ),
-              const Spacer(),
-              if (sr.scheduledDate != null)
-                Text(
-                  DateFormat('MMM dd, yyyy').format(sr.scheduledDate!),
-                  style: const TextStyle(
-                      color: secondaryText, fontSize: 11),
-                ),
-            ],
-          ),
-          if (sr.technicianName != null) ...[
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                const Icon(Icons.person_outline,
-                    color: secondaryText, size: 12),
-                const SizedBox(width: 4),
-                Text(
-                  sr.technicianName!,
-                  style: const TextStyle(
-                      color: secondaryText, fontSize: 11),
                 ),
               ],
             ),
-          ],
+          ),
+
+          const SizedBox(width: 8),
+
+          // ── Right: badge + date ────────────────────────────────
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // Status badge
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                decoration: BoxDecoration(
+                  color: status.bgColor,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  status.label,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              if (sr.scheduledDate != null) ...[
+                const SizedBox(height: 3),
+                Text(
+                  DateFormat('MMM dd').format(sr.scheduledDate!),
+                  style: const TextStyle(
+                    color: secondaryText,
+                    fontSize: 10,
+                  ),
+                ),
+              ],
+            ],
+          ),
         ],
+      ),
+    );
+  }
+}
+
+// ── View more button ──────────────────────────────────────────────────────────
+
+class _ViewMoreButton extends StatelessWidget {
+  final int remaining;
+  final VoidCallback onTap;
+
+  const _ViewMoreButton({required this.remaining, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: primaryBlue.withOpacity(0.06),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: primaryBlue.withOpacity(0.2)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              '+$remaining more requests',
+              style: const TextStyle(
+                color: primaryBlue,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 6),
+            const Icon(Icons.arrow_forward_rounded,
+                color: primaryBlue, size: 14),
+          ],
+        ),
       ),
     );
   }

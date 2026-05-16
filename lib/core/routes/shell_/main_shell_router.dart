@@ -239,7 +239,7 @@ class MainShellRouter extends StatelessWidget {
                         items: [
                           PopupMenuItem<void>(
                             enabled: false,
-                            padding: EdgeInsets.zero,
+                            padding: .all(15),
 
                             child: const ListTile(
                               leading: CircleAvatar(
@@ -268,37 +268,6 @@ class MainShellRouter extends StatelessWidget {
                             ),
                           ),
 
-                          PopupMenuItem(
-                            onTap: () async {
-                              await context
-                                  .read<AuthCubit>()
-                                  .logout();
-
-                              if (context.mounted) {
-                                context.go(loginPagePath);
-                              }
-                            },
-
-                            child: const Row(
-                              children: [
-                                Icon(
-                                  Icons.logout,
-                                  size: 16,
-                                  color: Color(0xFFFF6B6B),
-                                ),
-
-                                SizedBox(width: 10),
-
-                                Text(
-                                  'Logout',
-                                  style: TextStyle(
-                                    color: Color(0xFFFF6B6B),
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
                         ],
                       );
                     },
@@ -313,7 +282,7 @@ class MainShellRouter extends StatelessWidget {
                       ),
 
                       child: const Badge(
-                        label: Text('3'),
+                        label: Text('1'),
                         isLabelVisible: true,
 
                         child: Icon(

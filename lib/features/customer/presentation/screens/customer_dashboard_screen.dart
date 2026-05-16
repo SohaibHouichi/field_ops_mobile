@@ -1,7 +1,7 @@
 import 'package:field_ops/core/constants/app_color.dart';
 import 'package:field_ops/features/customer/domain/entities/customer_entity.dart';
 import 'package:field_ops/features/customer/presentation/cubit/customer_cubit.dart';
-import 'package:field_ops/features/customer/presentation/widgets/dashboard_widgets/asset_row_widget.dart';
+import 'package:field_ops/features/customer/presentation/widgets/assets_embedded_widgets/customer_assets_widget.dart';
 import 'package:field_ops/features/customer/presentation/widgets/dashboard_widgets/status_chip_widget.dart';
 import 'package:field_ops/features/customer/presentation/widgets/service_request_embedded_widgets/customer_service_requests_widget.dart';
 import 'package:field_ops/features/technician/presentation/screens/technician_dashboard_screen.dart';
@@ -22,6 +22,7 @@ class CustomerDashboard extends StatelessWidget {
       if (state is CustomerSuccess) return state.customer;
       return null;
     });
+    
 
     
     return ListView(
@@ -117,30 +118,10 @@ class CustomerDashboard extends StatelessWidget {
         const SizedBox(height: 20),
 
         // ── Recent assets ─────────────────────────────────────────
-        const SectionHeader(title: 'RECENT ASSETS'),
+        const SectionHeader(title: 'ASSETS'),
         const SizedBox(height: 12),
 
-        if (customer == null || customer.assetsList.isEmpty)
-          const Center(
-            child: Text(
-              'No assets found.',
-              style: TextStyle(color: secondaryText, fontSize: 13),
-            ),
-          )
-        else
-          ...customer.assetsList.map(
-            (asset) => Column(
-              children: [
-                AssetRow(
-                  name: asset.name,
-                  location: asset.brand ?? '—',
-                  status: asset.model ?? '—',
-                  icon: Icons.settings_outlined,
-                ),
-                const Divider(color: Color(0xFF2A2D3A), height: 1),
-              ],
-            ),
-          ),
+       CustomerAssetsWidget(assets: customer?.assetsList ?? []),
 
         const SizedBox(height: 32),
       ],
