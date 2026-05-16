@@ -242,7 +242,7 @@ class _ServiceRequestScreenState extends State<ServiceRequest> {
                     itemCount: _filtered.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 10),
                     itemBuilder: (context, index) =>
-                        _RequestCard(request: _filtered[index]),
+                        RequestCard(request: _filtered[index]),
                   ),
           ),
         ],
@@ -253,9 +253,9 @@ class _ServiceRequestScreenState extends State<ServiceRequest> {
 
 // ── Request card ───────────────────────────────────────────────────────────
 
-class _RequestCard extends StatelessWidget {
+class RequestCard extends StatelessWidget {
   final _ServiceRequest request;
-  const _RequestCard({required this.request});
+  const RequestCard({required this.request});
 
   @override
   Widget build(BuildContext context) {

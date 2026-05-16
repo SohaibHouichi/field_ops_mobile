@@ -4,6 +4,7 @@ import 'package:field_ops/features/customer/domain/usecases/params/update_custom
 
 abstract class CustomerRepository {
   //Future<List<CustomersEntity>> getCustomers();
+    Future<CustomersEntity> getCustomerById({required int id});
   Future<CustomersEntity> addCustomer({
     required AddCustomerParams customerData,
   });

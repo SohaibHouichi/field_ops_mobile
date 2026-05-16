@@ -3,6 +3,7 @@ import 'package:field_ops/features/customer/data/repository/customer_repository_
 import 'package:field_ops/features/customer/domain/repository/customer_repository.dart';
 import 'package:field_ops/features/customer/domain/usecases/create_customer_usecase.dart';
 import 'package:field_ops/features/customer/domain/usecases/delete_customer_usecase.dart';
+import 'package:field_ops/features/customer/domain/usecases/get_customer_by_id_usecase.dart';
 import 'package:field_ops/features/customer/domain/usecases/update_customer_usecase.dart';
 import 'package:field_ops/features/customer/presentation/cubit/customer_cubit.dart';
 import 'package:get_it/get_it.dart';
@@ -22,10 +23,12 @@ void setupCustomers(GetIt getIt) {
   getIt.registerLazySingleton(() =>CreateCustomerUsecase(getIt<CustomerRepository>()) );
   getIt.registerLazySingleton(() =>DeleteCustomerUsecase(getIt<CustomerRepository>()) );
   getIt.registerLazySingleton(() =>UpdateCustomerUsecase(getIt<CustomerRepository>()) );
+  getIt.registerLazySingleton(() =>GetCustomerByIdUsecase(getIt<CustomerRepository>()) );
   // --------Cubits--------------------------------------
   getIt.registerFactory<CustomerCubit>(
     () => CustomerCubit(
       createCustomerUsecase: getIt<CreateCustomerUsecase>(),
+      getCustomerByIdUsecase: getIt<GetCustomerByIdUsecase>(),
 
     ),
   );

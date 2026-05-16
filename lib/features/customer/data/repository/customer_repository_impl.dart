@@ -7,40 +7,47 @@ import 'package:field_ops/features/customer/domain/usecases/params/update_custom
 
 class CustomerRepositoryImpl implements CustomerRepository {
   final CustomersRemoteDataSource remoteDataSource;
+
   CustomerRepositoryImpl({required this.remoteDataSource});
+
+  CustomersRequest _toRequest(dynamic params) => CustomersRequest(
+        firstName: params.firstName,
+        lastName: params.lastName,
+        email: params.email,
+        gender: params.gender,
+        birthDate: params.birthDate,
+        phoneNumber: params.phoneNumber,
+        addressId: params.addressId,
+        note: params.note,
+      );
+
   @override
-  Future<CustomersEntity> addCustomer({required AddCustomerParams customerData}) async {
-    final customerReq = CustomersRequest(
-      firstName: customerData.firstName,
-      lastName: customerData.lastName,
-      email: customerData.email,
-      gender: customerData.gender,
-      birthDate: customerData.birthDate,
-      phoneNumber: customerData.phoneNumber,
-      addressId: customerData.addressId,
-      note: customerData.note,
+  Future<CustomersEntity> addCustomer({
+    required AddCustomerParams customerData,
+  }) async {
+    final res = await remoteDataSource.addCustomer(
+      customerData: _toRequest(customerData),
     );
-    final res = await remoteDataSource.addCustomer(customerData: customerReq);
-    final customer = res.toEntity();
-    if (customer == null) {
-      throw Exception('Failed to add customer. Invalid response from server.');
-    }
-    return customer;
+    return res.toEntity();
   }
+
   @override
-  Future<void> updateCustomer({required int id, required UpdateCustomerParams customerData}) async {
-    final customerReq = CustomersRequest(
-      firstName: customerData.firstName,
-      lastName: customerData.lastName,
-      email: customerData.email,
-      gender: customerData.gender,
-      birthDate: customerData.birthDate,
-      phoneNumber: customerData.phoneNumber,
-      addressId: customerData.addressId,
-      note: customerData.note,
-    );
-    await remoteDataSource.updateCustomer(id: id, customerData: customerReq);
+  Future<CustomersEntity> getCustomerById({required int id}) async {
+    final res = await remoteDataSource.getCustomerById(id: id);
+    return res.toEntity();
   }
+
+  @override
+  Future<void> updateCustomer({
+    required int id,
+    required UpdateCustomerParams customerData,
+  }) async {
+    await remoteDataSource.updateCustomer(
+      id: id,
+      customerData: _toRequest(customerData),
+    );
+  }
+
   @override
   Future<void> deleteCustomer({required int id}) async {
     await remoteDataSource.deleteCustomer(id: id);

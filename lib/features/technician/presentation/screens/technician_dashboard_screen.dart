@@ -97,7 +97,7 @@ class TechnicianDashboard extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: _SummaryCard(
+              child: SummaryCard(
                 icon: Icons.calendar_today_outlined,
                 label: "Today's\nTasks",
                 value: cubit.taskCountPerDay.toString(),
@@ -106,7 +106,7 @@ class TechnicianDashboard extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: _SummaryCard(
+              child: SummaryCard(
                 icon: Icons.account_tree_outlined,
                 label: 'Active\nProjects',
                 value: cubit.currentProjects.toString(),
@@ -115,7 +115,7 @@ class TechnicianDashboard extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: _SummaryCard(
+              child: SummaryCard(
                 icon: Icons.check_circle_outline,
                 label: 'Completed\nToday',
                 value: '3',
@@ -128,7 +128,7 @@ class TechnicianDashboard extends StatelessWidget {
         const SizedBox(height: 20),
 
         // ── Today's schedule ──────────────────────────────────────
-        _SectionHeader(title: "TODAY'S SCHEDULE"),
+        SectionHeader(title: "TODAY'S SCHEDULE"),
         const SizedBox(height: 12),
 
         _TaskCard(
@@ -164,13 +164,13 @@ class TechnicianDashboard extends StatelessWidget {
         const SizedBox(height: 20),
 
         // ── Quick actions ─────────────────────────────────────────
-        _SectionHeader(title: 'QUICK ACTIONS'),
+        SectionHeader(title: 'QUICK ACTIONS'),
         const SizedBox(height: 12),
 
         Row(
           children: [
             Expanded(
-              child: _ActionButton(
+              child: ActionButton(
                 icon: Icons.add_task,
                 label: 'Log Work',
                 onTap: () {},
@@ -178,7 +178,7 @@ class TechnicianDashboard extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: _ActionButton(
+              child: ActionButton(
                 icon: Icons.report_problem_outlined,
                 label: 'Report Issue',
                 onTap: () {},
@@ -186,7 +186,7 @@ class TechnicianDashboard extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: _ActionButton(
+              child: ActionButton(
                 icon: Icons.qr_code_scanner,
                 label: 'Scan Asset',
                 onTap: () {},
@@ -198,7 +198,7 @@ class TechnicianDashboard extends StatelessWidget {
         const SizedBox(height: 20),
 
         // ── Recent activity ───────────────────────────────────────
-        _SectionHeader(title: 'RECENT ACTIVITY'),
+        SectionHeader(title: 'RECENT ACTIVITY'),
         const SizedBox(height: 12),
 
         Container(
@@ -242,9 +242,9 @@ class TechnicianDashboard extends StatelessWidget {
 
 // ── Shared widgets ─────────────────────────────────────────────────────────
 
-class _SectionHeader extends StatelessWidget {
+class SectionHeader extends StatelessWidget {
   final String title;
-  const _SectionHeader({required this.title});
+  const SectionHeader({required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -266,12 +266,12 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _SummaryCard extends StatelessWidget {
+class SummaryCard extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
   final Color accent;
-  const _SummaryCard({
+  const SummaryCard({
     required this.icon,
     required this.label,
     required this.value,
@@ -466,11 +466,11 @@ class _TaskCard extends StatelessWidget {
   }
 }
 
-class _ActionButton extends StatelessWidget {
+class ActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  const _ActionButton({
+  const ActionButton({
     required this.icon,
     required this.label,
     required this.onTap,

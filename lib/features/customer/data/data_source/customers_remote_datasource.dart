@@ -4,6 +4,7 @@ import 'package:field_ops/features/customer/data/models/customers_response.dart'
 
 abstract class CustomersRemoteDataSource {
   //Future<CustomersResponse> getCustomers();
+  Future<CustomersResponse> getCustomerById({required int id});
   Future<CustomersResponse> addCustomer({
     required CustomersRequest customerData,
   });
@@ -24,6 +25,12 @@ class CustomersRemoteDataSourceImpl implements CustomersRemoteDataSource {
   //   );
   //   return CustomersResponse.fromJson(res.data);
   // }
+  @override
+  Future<CustomersResponse> getCustomerById({required int id}) async {
+    final res = await dioClient.get('/v1/customers/$id');
+    return CustomersResponse.fromJson(res.data);
+  }
+
   @override
   Future<CustomersResponse> addCustomer({
     required CustomersRequest customerData,

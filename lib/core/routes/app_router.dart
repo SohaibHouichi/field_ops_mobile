@@ -3,6 +3,7 @@ import 'package:field_ops/features/auth/domain/entities/user_entity.dart';
 import 'package:field_ops/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:field_ops/features/customer/presentation/cubit/customer_cubit.dart';
 import 'package:field_ops/features/customer/presentation/screens/customer_dashboard_screen.dart';
+import 'package:field_ops/features/customer/presentation/screens/customer_profile_screen.dart';
 import 'package:field_ops/features/technician/presentation/screens/technician_dashboard_screen.dart';
 import 'package:field_ops/layers/business_logic/cubit/Home/home_cubit.dart';
 import 'package:field_ops/features/auth/presentation/screens/login_screen.dart';
@@ -85,8 +86,9 @@ GoRouter _buildRouter() {
 
       // ── Customer shell ────────────────────────────────────────────
       StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) => MainShellRouter(
-          navigationShell: navigationShell,
+        builder: (context, state, navigationShell) => BlocProvider.value(
+          value: customerCubit,
+          child: MainShellRouter(navigationShell: navigationShell),
         ),
         branches: [
           StatefulShellBranch(
@@ -116,15 +118,15 @@ GoRouter _buildRouter() {
           //     ),
           //   ],
           // ),
-          // StatefulShellBranch(
-          //   routes: [
-          //     GoRoute(
-          //       path: customerProfilePagePath,  // e.g. '/customer/profile'
-          //       name: customerProfilePageName,
-          //       builder: (context, state) => const ProfileScreen(),
-          //     ),
-          //   ],
-          // ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: customerProfilePagePath,  // e.g. '/customer/profile'
+                name: customerProfilePageName,
+                builder: (context, state) =>  CustomerProfileScreen(),
+              ),
+            ],
+          ),
         ],
       ),
 

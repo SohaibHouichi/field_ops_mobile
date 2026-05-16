@@ -1,7 +1,7 @@
 
 // ------------- LOGIN STRINGS -------------
 const String appName = 'FIELDOPS';
-const String loginHeadline = 'Welcome\nback.';
+const String loginHeadline = 'Welcome\n\tback.';
 const String loginSubtitle = 'Field Service Management Platform';
 
 const String usernameLabel = 'USERNAME';

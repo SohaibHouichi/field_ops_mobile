@@ -8,41 +8,46 @@ part 'customers_response.g.dart';
 class CustomersResponse {
   final int id;
   final String fullName;
-  final Gender gender;
-  final DateTime birthDate;
+  final int gender;
+  final DateTime? birthDate;        // nullable
   final String email;
   final String phoneNumber;
   final String? note;
   final String? addressId;
   final String? addressLabel;
+  final String? fullAddressLine;    // added
 
-  CustomersResponse({
+  // Ignored: addressList, assetsList, serviceRequestsList
+  // (handle separately when needed)
+
+  const CustomersResponse({
     required this.id,
     required this.fullName,
     required this.gender,
-    required this.birthDate,
     required this.email,
     required this.phoneNumber,
-    required this.note,
-    required this.addressId,
-    required this.addressLabel,
+    this.birthDate,
+    this.note,
+    this.addressId,
+    this.addressLabel,
+    this.fullAddressLine,
   });
-   factory CustomersResponse.fromJson(Map<String, dynamic> json) =>
+
+  factory CustomersResponse.fromJson(Map<String, dynamic> json) =>
       _$CustomersResponseFromJson(json);
 
   Map<String, dynamic> toJson() => _$CustomersResponseToJson(this);
 
-  CustomersEntity? toEntity() {
-    return CustomersEntity(
-      id: id,
-      fullName: fullName,
-      gender: gender,
-      birthDate: birthDate,
-      email: email,
-      phoneNumber: phoneNumber,
-      note: note,
-      addressId: addressId,
-      addressLabel: addressLabel,
-    );
-  }
+  CustomersEntity toEntity() => CustomersEntity(
+        id: id,
+        fullName: fullName,
+        gender: gender,
+        email: email,
+        phoneNumber: phoneNumber,
+        birthDate: birthDate,
+        note: note,
+        addressId: addressId,
+        addressLabel: addressLabel,
+        fullAddressLine: fullAddressLine,
+      );
 }

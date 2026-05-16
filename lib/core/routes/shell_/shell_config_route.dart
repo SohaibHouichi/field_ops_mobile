@@ -7,6 +7,11 @@ Map<String, ShellRequirementModel> shellConfigRoute = {
     showBottomNavigationBar: true,
     showFloatingButton: false,
   ),
+  customerProfilePagePath: ShellRequirementModel(
+    title: '',
+    showBottomNavigationBar: true,
+    showFloatingButton: false,
+  ),
   technicianHomePagePath: ShellRequirementModel(
     title: '',
     showBottomNavigationBar: true,
