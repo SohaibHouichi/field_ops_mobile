@@ -43,6 +43,15 @@ class MainShellRouter extends StatelessWidget {
         : CustomerNavItems.items;
 
     return Scaffold(
+      floatingActionButton: config.showFloatingButton
+          ? FloatingActionButton(
+              onPressed: () {
+                // Handle FAB action
+              },
+              backgroundColor: primaryBlue,
+              child: const Icon(Icons.add, color: Colors.white),
+            )
+          : null,
       backgroundColor: bgColor,
 
       // ───────────────── APPBAR ─────────────────
