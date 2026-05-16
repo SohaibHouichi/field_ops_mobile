@@ -2,7 +2,7 @@ import 'package:field_ops/core/constants/app_color.dart';
 import 'package:field_ops/core/enums/gender_enum.dart';
 import 'package:field_ops/features/customer/domain/entities/customer_entity.dart';
 import 'package:field_ops/features/customer/presentation/cubit/customer_cubit.dart';
-import 'package:field_ops/features/auth/presentation/cubit/auth_cubit.dart';
+// import 'package:field_ops/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,17 +13,12 @@ class CustomerProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authState = context.read<AuthCubit>().state;
-    final id = authState is AuthAuthenticated
-        ? authState.user.userId
-        : 0;
+    // final authState = context.read<AuthCubit>().state;
+    // final id = authState is AuthAuthenticated
+    //     ? authState.user.userId
+    //     : 0;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final state = context.read<CustomerCubit>().state;
-      if (state is! CustomerSuccess && state is! CustomerLoading) {
-        context.read<CustomerCubit>().getCustomerById(id: 25);
-      }
-    });
+   
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,

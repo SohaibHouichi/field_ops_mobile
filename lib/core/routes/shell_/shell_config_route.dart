@@ -12,6 +12,11 @@ Map<String, ShellRequirementModel> shellConfigRoute = {
     showBottomNavigationBar: true,
     showFloatingButton: false,
   ),
+  customerRequestsPagePath: ShellRequirementModel(
+    title: '',
+    showBottomNavigationBar: true,
+    showFloatingButton: false,
+  ),
   technicianHomePagePath: ShellRequirementModel(
     title: '',
     showBottomNavigationBar: true,

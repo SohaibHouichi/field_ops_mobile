@@ -1,4 +1,5 @@
-import 'package:field_ops/core/enums/gender_enum.dart';
+import 'package:field_ops/features/customer/data/models/embedded/assets_embedded_response.dart';
+import 'package:field_ops/features/customer/data/models/embedded/service_request_embedded_response.dart';
 import 'package:field_ops/features/customer/domain/entities/customer_entity.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -9,16 +10,15 @@ class CustomersResponse {
   final int id;
   final String fullName;
   final int gender;
-  final DateTime? birthDate;        // nullable
+  final DateTime? birthDate;
   final String email;
   final String phoneNumber;
   final String? note;
   final String? addressId;
   final String? addressLabel;
-  final String? fullAddressLine;    // added
-
-  // Ignored: addressList, assetsList, serviceRequestsList
-  // (handle separately when needed)
+  final String? fullAddressLine;
+  final List<AssetEmbeddedResponse>? assetsList;
+  final List<ServiceRequestEmbeddedResponse>? serviceRequestsList;
 
   const CustomersResponse({
     required this.id,
@@ -31,6 +31,8 @@ class CustomersResponse {
     this.addressId,
     this.addressLabel,
     this.fullAddressLine,
+    this.assetsList,
+    this.serviceRequestsList,
   });
 
   factory CustomersResponse.fromJson(Map<String, dynamic> json) =>
@@ -49,5 +51,8 @@ class CustomersResponse {
         addressId: addressId,
         addressLabel: addressLabel,
         fullAddressLine: fullAddressLine,
+        assetsList: assetsList?.map((e) => e.toEntity()).toList() ?? [],
+        serviceRequestsList:
+            serviceRequestsList?.map((e) => e.toEntity()).toList() ?? [],
       );
 }

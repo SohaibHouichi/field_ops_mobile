@@ -1,21 +1,37 @@
 import 'package:field_ops/core/constants/app_color.dart';
+import 'package:field_ops/features/customer/domain/entities/customer_entity.dart';
+import 'package:field_ops/features/customer/presentation/cubit/customer_cubit.dart';
 import 'package:field_ops/features/customer/presentation/widgets/dashboard_widgets/asset_row_widget.dart';
 import 'package:field_ops/features/customer/presentation/widgets/dashboard_widgets/status_chip_widget.dart';
+import 'package:field_ops/features/customer/presentation/widgets/service_request_embedded_widgets/customer_service_requests_widget.dart';
 import 'package:field_ops/features/technician/presentation/screens/technician_dashboard_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 class CustomerDashboard extends StatelessWidget {
   const CustomerDashboard({super.key});
-
+  
   @override
   Widget build(BuildContext context) {
+      final state = context.read<CustomerCubit>().state;
+      if (state is! CustomerSuccess && state is! CustomerLoading) {
+      context.read<CustomerCubit>().getCustomerById(id: 25);
+      }
+    final customer = context.select((CustomerCubit cubit) {
+      final state = cubit.state;
+      if (state is CustomerSuccess) return state.customer;
+      return null;
+    });
+
+    
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       children: [
         // ── Status chip row ───────────────────────────────────────
-        Row(
+        const Row(
           children: [
             StatusChip(label: 'ACTIVE PLAN', value: 'ENTERPRISE'),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             StatusChip(label: 'SLA', value: '99.8%'),
           ],
         ),
@@ -29,7 +45,7 @@ class CustomerDashboard extends StatelessWidget {
               child: SummaryCard(
                 icon: Icons.build_circle_outlined,
                 label: 'Open\nRequests',
-                value: '4',
+                value: _openRequests(customer),
                 accent: primaryBlue,
               ),
             ),
@@ -38,7 +54,7 @@ class CustomerDashboard extends StatelessWidget {
               child: SummaryCard(
                 icon: Icons.check_circle_outline,
                 label: 'Completed\nThis Month',
-                value: '11',
+                value: _completedRequests(customer),
                 accent: const Color(0xFF4ADE80),
               ),
             ),
@@ -47,7 +63,7 @@ class CustomerDashboard extends StatelessWidget {
               child: SummaryCard(
                 icon: Icons.inventory_2_outlined,
                 label: 'My\nAssets',
-                value: '7',
+                value: '${customer?.assetsList.length ?? 0}',
                 accent: const Color(0xFFFBBF24),
               ),
             ),
@@ -56,44 +72,18 @@ class CustomerDashboard extends StatelessWidget {
 
         const SizedBox(height: 20),
 
-        // ── Active requests section ───────────────────────────────
-        SectionHeader(title: 'ACTIVE REQUESTS'),
+        // ── Active requests ───────────────────────────────────────
+        const SectionHeader(title: 'REQUESTS'),
         const SizedBox(height: 12),
 
-        // RequestCard(
-        //   id: 'REQ-0041',
-        //   title: 'HVAC Unit Maintenance',
-        //   status: 'In Progress',
-        //   statusColor: primaryBlue,
-        //   priority: 'HIGH',
-        //   date: 'May 14, 2026',
-        //   icon: Icons.air,
-        // ),
-        // const SizedBox(height: 10),
-        // RequestCard(
-        //   id: 'REQ-0039',
-        //   title: 'Electrical Panel Inspection',
-        //   status: 'Pending',
-        //   statusColor: const Color(0xFFFBBF24),
-        //   priority: 'MEDIUM',
-        //   date: 'May 12, 2026',
-        //   icon: Icons.electrical_services_outlined,
-        // ),
-        // const SizedBox(height: 10),
-        // RequestCard(
-        //   id: 'REQ-0037',
-        //   title: 'Compressor Replacement',
-        //   status: 'Scheduled',
-        //   statusColor: const Color(0xFF4ADE80),
-        //   priority: 'LOW',
-        //   date: 'May 10, 2026',
-        //   icon: Icons.settings_outlined,
-        // ),
+        CustomerServiceRequestsWidget(
+          serviceRequests: customer?.serviceRequestsList ?? [],
+        ),
 
         const SizedBox(height: 20),
 
         // ── Quick actions ─────────────────────────────────────────
-        SectionHeader(title: 'QUICK ACTIONS'),
+        const SectionHeader(title: 'QUICK ACTIONS'),
         const SizedBox(height: 12),
 
         Row(
@@ -127,32 +117,43 @@ class CustomerDashboard extends StatelessWidget {
         const SizedBox(height: 20),
 
         // ── Recent assets ─────────────────────────────────────────
-        SectionHeader(title: 'RECENT ASSETS'),
+        const SectionHeader(title: 'RECENT ASSETS'),
         const SizedBox(height: 12),
 
-        AssetRow(
-          name: 'Cooling Tower Unit A',
-          location: 'Building 3 — Floor 2',
-          status: 'Operational',
-          icon: Icons.ac_unit_outlined,
-        ),
-        const Divider(color: Color(0xFF2A2D3A), height: 1),
-        AssetRow(
-          name: 'Generator — Main',
-          location: 'Basement Level',
-          status: 'Maintenance Due',
-          icon: Icons.bolt_outlined,
-        ),
-        const Divider(color: Color(0xFF2A2D3A), height: 1),
-        AssetRow(
-          name: 'Fire Suppression System',
-          location: 'All Floors',
-          status: 'Operational',
-          icon: Icons.local_fire_department_outlined,
-        ),
+        if (customer == null || customer.assetsList.isEmpty)
+          const Center(
+            child: Text(
+              'No assets found.',
+              style: TextStyle(color: secondaryText, fontSize: 13),
+            ),
+          )
+        else
+          ...customer.assetsList.map(
+            (asset) => Column(
+              children: [
+                AssetRow(
+                  name: asset.name,
+                  location: asset.brand ?? '—',
+                  status: asset.model ?? '—',
+                  icon: Icons.settings_outlined,
+                ),
+                const Divider(color: Color(0xFF2A2D3A), height: 1),
+              ],
+            ),
+          ),
 
         const SizedBox(height: 32),
       ],
     );
+  }
+
+  String _openRequests(CustomersEntity? customer) {
+    if (customer == null) return '0';
+    return '${customer.serviceRequestsList.where((sr) => sr.status == 1 || sr.status == 2).length}';
+  }
+
+  String _completedRequests(CustomersEntity? customer) {
+    if (customer == null) return '0';
+    return '${customer.serviceRequestsList.where((sr) => sr.status == 3).length}';
   }
 }
