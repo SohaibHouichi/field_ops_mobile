@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:field_ops/features/assets/assets_injection.dart';
 import 'package:field_ops/features/auth/auth_injection.dart';
 import 'package:field_ops/core/di/home_injection.dart';
 import 'package:field_ops/core/di/shell_injection.dart';
@@ -18,5 +19,6 @@ class DiContainer {
     setupShell(getIt);
     setupCustomers(getIt);
     setupHome(getIt);
+    setupAssets(getIt);
   }
 }

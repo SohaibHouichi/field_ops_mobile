@@ -1,4 +1,6 @@
 import 'package:field_ops/core/constants/app_router.dart';
+import 'package:field_ops/features/assets/presentation/cubit/assets_cubit.dart';
+import 'package:field_ops/features/assets/presentation/screens/assets_screen.dart';
 import 'package:field_ops/features/auth/domain/entities/user_entity.dart';
 import 'package:field_ops/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:field_ops/features/customer/presentation/cubit/customer_cubit.dart';
@@ -23,6 +25,7 @@ import '../di/di_container.dart';
 GoRouter _buildRouter() {
   final authCubit = DiContainer.getIt<AuthCubit>();
   final customerCubit = DiContainer.getIt<CustomerCubit>();
+  final assetsCubit = DiContainer.getIt<AssetsCubit>();
 
   return GoRouter(
     debugLogDiagnostics: true,
@@ -110,15 +113,18 @@ GoRouter _buildRouter() {
               ),
             ],
           ),
-          // StatefulShellBranch(
-          //   routes: [
-          //     GoRoute(
-          //       path: customerAssetsPagePath,    // e.g. '/customer/assets'
-          //       name: customerAssetsPageName,
-          //       builder: (context, state) => const CustomerAssetsScreen(),
-          //     ),
-          //   ],
-          // ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: customerAssetsPagePath,    // e.g. '/customer/assets'
+                name: customerAssetsPageName,
+                builder: (context, state) => BlocProvider.value(
+                  value: assetsCubit,
+                  child:  AssetsScreen(),
+                ),
+              ),
+            ],
+          ),
           StatefulShellBranch(
             routes: [
               GoRoute(

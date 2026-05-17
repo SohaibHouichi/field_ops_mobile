@@ -4,23 +4,24 @@ import 'package:field_ops/features/assets/domain/entities/assets_entity.dart';
 import 'package:field_ops/features/assets/domain/repository/assets_repository.dart';
 import 'package:field_ops/features/assets/domain/usecases/params/add_assets_params.dart';
 import 'package:field_ops/features/assets/domain/usecases/params/update_assets_params.dart';
+import 'package:field_ops/features/customer/domain/entities/embedded/assets_embedded_entity.dart';
 
 class AssetsRepositoryImpl implements AssetsRepository {
   final AssetsRemoteDataSource remoteDataSource;
   AssetsRepositoryImpl(this.remoteDataSource);
 
   AssetRequest _toRequest(dynamic params) => AssetRequest(
-        name : params.name,
-        customerId: params.customerId,
-        brand: params.brand,
-        model: params.model,
-        serialNumber: params.serialNumber,
-      );
+    name: params.name,
+    customerId: params.customerId,
+    brand: params.brand,
+    model: params.model,
+    serialNumber: params.serialNumber,
+  );
 
   @override
   Future<AssetEntity> createAsset(AddAssetsParams assetParams) async {
-   final res = await remoteDataSource.createAsset(_toRequest(assetParams));
-   return res.toEntity();
+    final res = await remoteDataSource.createAsset(_toRequest(assetParams));
+    return res.toEntity();
   }
 
   @override
@@ -46,4 +47,17 @@ class AssetsRepositoryImpl implements AssetsRepository {
       throw Exception('Failed to update asset: $e');
     }
   }
+
+ @override
+Future<List<AssetEmbeddedEntity>> searchAssets(String name) async {
+  final res = await remoteDataSource.searchAssets(name);
+  return res.map((e) => AssetEmbeddedEntity(
+    id: e.id,
+    name: e.name,
+    serialNumber: e.serialNumber,
+    brand: e.brand,
+    model: e.model,
+    note: e.note,
+  )).toList();
+}
 }

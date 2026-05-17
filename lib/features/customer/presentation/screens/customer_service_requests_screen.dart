@@ -2,27 +2,16 @@
 
 import 'package:field_ops/core/config/status_config.dart';
 import 'package:field_ops/core/constants/app_color.dart';
-import 'package:field_ops/core/widgets/pulse_dot_widget.dart';
+import 'package:field_ops/core/enums/status_enums.dart';
+import 'package:field_ops/core/widgets/filter/filter_chips_widget.dart';
+import 'package:field_ops/core/widgets/hearder/count_header_widget.dart';
+import 'package:field_ops/core/widgets/search_bar/search_bar_widget.dart';
 import 'package:field_ops/features/customer/domain/entities/embedded/service_request_embedded_entity.dart';
 import 'package:field_ops/features/customer/presentation/cubit/customer_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
-// ── Filter options ────────────────────────────────────────────────────────────
-
-// null = All
-const _filterOptions = <ServiceRequestStatus?>[
-  null,
-  ServiceRequestStatus.newRequest,
-  ServiceRequestStatus.accepted,
-  ServiceRequestStatus.rejected,
-  ServiceRequestStatus.scheduled,
-  ServiceRequestStatus.inProgress,
-  ServiceRequestStatus.onHold,
-  ServiceRequestStatus.completed,
-  ServiceRequestStatus.cancelled,
-];
 
 // ── Screen (StatefulWidget — owns only local UI state) ────────────────────────
 
@@ -34,8 +23,7 @@ class CustomerServiceRequests extends StatefulWidget {
       _CustomerServiceRequestsState();
 }
 
-class _CustomerServiceRequestsState
-    extends State<CustomerServiceRequests> {
+class _CustomerServiceRequestsState extends State<CustomerServiceRequests> {
   ServiceRequestStatus? _filter;
   final _searchController = TextEditingController();
   String _query = '';
@@ -50,9 +38,9 @@ class _CustomerServiceRequestsState
     List<ServiceRequestEmbeddedEntity> all,
   ) {
     return all.where((sr) {
-      final matchesStatus =
-          _filter == null || sr.status == _filter!.value;
-      final matchesQuery = _query.isEmpty ||
+      final matchesStatus = _filter == null || sr.status == _filter!.value;
+      final matchesQuery =
+          _query.isEmpty ||
           sr.title.toLowerCase().contains(_query.toLowerCase()) ||
           sr.reference.toLowerCase().contains(_query.toLowerCase());
       return matchesStatus && matchesQuery;
@@ -66,14 +54,13 @@ class _CustomerServiceRequestsState
         final all = state is CustomerSuccess
             ? state.customer.serviceRequestsList
             : <ServiceRequestEmbeddedEntity>[];
-        final filtered  = _applyFilter(all);
+        final filtered = _applyFilter(all);
         final isLoading = state is CustomerLoading || state is CustomerInitial;
 
         return _CustomerServiceRequestsView(
           filtered: filtered,
           isLoading: isLoading,
           filter: _filter,
-          query: _query,
           searchController: _searchController,
           onFilterChanged: (f) => setState(() => _filter = f),
           onQueryChanged: (v) => setState(() => _query = v),
@@ -93,7 +80,6 @@ class _CustomerServiceRequestsView extends StatelessWidget {
   final List<ServiceRequestEmbeddedEntity> filtered;
   final bool isLoading;
   final ServiceRequestStatus? filter;
-  final String query;
   final TextEditingController searchController;
   final ValueChanged<ServiceRequestStatus?> onFilterChanged;
   final ValueChanged<String> onQueryChanged;
@@ -103,7 +89,6 @@ class _CustomerServiceRequestsView extends StatelessWidget {
     required this.filtered,
     required this.isLoading,
     required this.filter,
-    required this.query,
     required this.searchController,
     required this.onFilterChanged,
     required this.onQueryChanged,
@@ -118,9 +103,9 @@ class _CustomerServiceRequestsView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // ── Search bar ───────────────────────────────────────────
-          _SearchBar(
+          SearchBarWidget(
+            label: 'Search service requests...',
             controller: searchController,
-            query: query,
             onChanged: onQueryChanged,
             onClear: onClearQuery,
           ),
@@ -128,15 +113,19 @@ class _CustomerServiceRequestsView extends StatelessWidget {
           const SizedBox(height: 12),
 
           // ── Filter chips ─────────────────────────────────────────
-          _FilterChips(
+          FilterChips<ServiceRequestStatus>(
             selected: filter,
             onSelected: onFilterChanged,
+            options: [null, ...ServiceRequestStatus.values],
+            getColor: (o) => o?.color ?? primaryBlue,
+            getBgColor: (o) => o?.bgColor ?? primaryBlue.withOpacity(0.12),
+            getLabel: (o) => o?.label ?? 'All',
           ),
 
           const SizedBox(height: 16),
 
           // ── Count header ─────────────────────────────────────────
-          _CountHeader(count: filtered.length),
+          CountHeader(label: 'Service Requests', count: filtered.length),
 
           const SizedBox(height: 12),
 
@@ -145,162 +134,18 @@ class _CustomerServiceRequestsView extends StatelessWidget {
             child: isLoading
                 ? const _SkeletonList()
                 : filtered.isEmpty
-                    ? _EmptyState(query: query)
-                    : ListView.separated(
-                        itemCount: filtered.length,
-                        separatorBuilder: (_, __) =>
-                            const SizedBox(height: 10),
-                        itemBuilder: (_, i) =>
-                            _RequestCard(sr: filtered[i]),
-                      ),
+                ? _EmptyState(query: searchController.text)
+                : ListView.separated(
+                    itemCount: filtered.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (_, i) => _RequestCard(sr: filtered[i]),
+                  ),
           ),
         ],
       ),
     );
   }
 }
-
-// ── Search bar ────────────────────────────────────────────────────────────────
-
-class _SearchBar extends StatelessWidget {
-  final TextEditingController controller;
-  final String query;
-  final ValueChanged<String> onChanged;
-  final VoidCallback onClear;
-
-  const _SearchBar({
-    required this.controller,
-    required this.query,
-    required this.onChanged,
-    required this.onClear,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: inputBorder),
-      ),
-      child: TextField(
-        controller: controller,
-        onChanged: onChanged,
-        style: const TextStyle(color: primaryText, fontSize: 13),
-        decoration: InputDecoration(
-          hintText: 'Search service requests...',
-          hintStyle: const TextStyle(color: secondaryText, fontSize: 13),
-          prefixIcon: const Icon(Icons.search, color: secondaryText, size: 18),
-          suffixIcon: query.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(Icons.close, color: secondaryText, size: 16),
-                  onPressed: onClear,
-                )
-              : null,
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 14),
-        ),
-      ),
-    );
-  }
-}
-
-// ── Filter chips ──────────────────────────────────────────────────────────────
-
-class _FilterChips extends StatelessWidget {
-  final ServiceRequestStatus? selected;
-  final ValueChanged<ServiceRequestStatus?> onSelected;
-
-  const _FilterChips({required this.selected, required this.onSelected});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 36,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: _filterOptions.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (_, i) {
-          final option   = _filterOptions[i];
-          final isActive = selected == option;
-          final color    = option?.color   ?? primaryBlue;
-          final bg       = option?.bgColor ?? primaryBlue.withOpacity(0.12);
-          final label    = option?.label   ?? 'All';
-
-          return GestureDetector(
-            onTap: () => onSelected(option),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                color: isActive ? bg : chipBg,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: isActive ? color.withOpacity(0.5) : chipBorder,
-                ),
-              ),
-              child: Text(
-                label,
-                style: TextStyle(
-                  color: isActive ? color : secondaryText,
-                  fontSize: 11,
-                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                  letterSpacing: 0.3,
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-// ── Count header ──────────────────────────────────────────────────────────────
-
-class _CountHeader extends StatelessWidget {
-  final int count;
-  const _CountHeader({required this.count});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const PulseDot(),
-        const SizedBox(width: 8),
-        const Text(
-          'SERVICE REQUESTS',
-          style: TextStyle(
-            color: primaryBlue,
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 2,
-          ),
-        ),
-        const Spacer(),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-          decoration: BoxDecoration(
-            color: chipBg,
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: chipBorder),
-          ),
-          child: Text(
-            '$count results',
-            style: const TextStyle(
-              color: secondaryText,
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ── Request card ──────────────────────────────────────────────────────────────
 
 class _RequestCard extends StatelessWidget {
   final ServiceRequestEmbeddedEntity sr;
@@ -309,7 +154,7 @@ class _RequestCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final status = ServiceRequestStatus.fromInt(sr.status);
-    final color  = status.color;
+    final color = status.color;
 
     return Container(
       decoration: BoxDecoration(
@@ -365,7 +210,9 @@ class _RequestCard extends StatelessWidget {
                         // ── Status badge ──────────────────────────
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: status.bgColor,
                             borderRadius: BorderRadius.circular(6),
@@ -402,7 +249,9 @@ class _RequestCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                            color: secondaryText, fontSize: 12),
+                          color: secondaryText,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
 
@@ -412,14 +261,20 @@ class _RequestCard extends StatelessWidget {
                     Row(
                       children: [
                         if (sr.scheduledDate != null) ...[
-                          const Icon(Icons.play_arrow_outlined,
-                              size: 12, color: secondaryText),
+                          const Icon(
+                            Icons.play_arrow_outlined,
+                            size: 12,
+                            color: secondaryText,
+                          ),
                           const SizedBox(width: 4),
                           Text(
-                            DateFormat('MMM dd, yyyy')
-                                .format(sr.scheduledDate!),
+                            DateFormat(
+                              'MMM dd, yyyy',
+                            ).format(sr.scheduledDate!),
                             style: const TextStyle(
-                                color: secondaryText, fontSize: 11),
+                              color: secondaryText,
+                              fontSize: 11,
+                            ),
                           ),
                         ],
                         if (sr.dueDate != null) ...[
@@ -433,13 +288,18 @@ class _RequestCard extends StatelessWidget {
                         ],
                         const Spacer(),
                         if (sr.technicianName != null) ...[
-                          const Icon(Icons.person_outline,
-                              size: 12, color: secondaryText),
+                          const Icon(
+                            Icons.person_outline,
+                            size: 12,
+                            color: secondaryText,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             sr.technicianName!,
                             style: const TextStyle(
-                                color: secondaryText, fontSize: 11),
+                              color: secondaryText,
+                              fontSize: 11,
+                            ),
                           ),
                         ],
                       ],
@@ -486,10 +346,10 @@ class _RequestCardSkeletonState extends State<_RequestCardSkeleton>
     duration: const Duration(milliseconds: 1000),
   )..repeat(reverse: true);
 
-  late final Animation<double> _animation =
-      Tween<double>(begin: 0.3, end: 1.0).animate(
-    CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-  );
+  late final Animation<double> _animation = Tween<double>(
+    begin: 0.3,
+    end: 1.0,
+  ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
   @override
   void dispose() {
@@ -602,8 +462,11 @@ class _EmptyState extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: chipBorder),
             ),
-            child: const Icon(Icons.inbox_outlined,
-                color: secondaryText, size: 32),
+            child: const Icon(
+              Icons.inbox_outlined,
+              color: secondaryText,
+              size: 32,
+            ),
           ),
           const SizedBox(height: 16),
           Text(

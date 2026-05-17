@@ -7,6 +7,7 @@ abstract class AssetsRemoteDataSource {
   Future<AssetResponse> createAsset(AssetRequest assetRequest);
   Future<void> updateAsset(int assetId, AssetRequest assetRequest);
   Future<void> deleteAsset(int assetId);
+  Future<List<AssetResponse>> searchAssets(String name);
 }
 
 class AssetsRemoteDataSourceImpl implements AssetsRemoteDataSource {
@@ -40,4 +41,14 @@ class AssetsRemoteDataSourceImpl implements AssetsRemoteDataSource {
   Future<void> deleteAsset(int assetId) async {
     await dioClient.delete('/v1/assets/$assetId');
   }
+@override
+Future<List<AssetResponse>> searchAssets(String name) async {
+  final res = await dioClient.get(
+    '/v1/assets',
+    queryParameters: {'search[name]': name},
+  );
+  return (res.data['items'] as List)
+      .map((e) => AssetResponse.fromJson(e as Map<String, dynamic>))
+      .toList();
+}
 }
