@@ -1,4 +1,4 @@
-import 'package:field_ops/features/customer/domain/entities/embedded/assets_embedded_entity.dart';
+import 'package:field_ops/features/assets/domain/entities/assets_entity.dart';
 import 'package:field_ops/features/customer/domain/entities/embedded/service_request_embedded_entity.dart';
 
 class CustomersEntity {
@@ -12,7 +12,7 @@ class CustomersEntity {
   final String? addressId;
   final String? addressLabel;
   final String? fullAddressLine;
-  final List<AssetEmbeddedEntity> assetsList;
+  final List<AssetEntity> assetsList;
   final List<ServiceRequestEmbeddedEntity> serviceRequestsList;
 
   const CustomersEntity({

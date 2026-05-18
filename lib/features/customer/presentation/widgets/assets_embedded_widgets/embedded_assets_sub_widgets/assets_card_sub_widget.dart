@@ -1,20 +1,73 @@
-
 import 'package:field_ops/core/constants/app_color.dart';
-import 'package:field_ops/features/customer/domain/entities/embedded/assets_embedded_entity.dart';
+import 'package:field_ops/features/assets/domain/entities/assets_entity.dart';
+import 'package:field_ops/features/assets/presentation/cubit/assets_cubit.dart';
+import 'package:field_ops/features/assets/presentation/widgets/sheets/add_asset_sheet.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AssetCard extends StatelessWidget {
-  final AssetEmbeddedEntity asset;
+  final AssetEntity asset;
   const AssetCard({super.key, required this.asset});
+
+  void _openEditSheet(BuildContext context) {
+    final cubit = context.read<AssetsCubit>();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => BlocProvider.value(
+        value: cubit,
+        child: AddAssetsSheet(
+          asset: asset, // edit mode
+          nameController: cubit.nameController,
+          brandController: cubit.brandController,
+          modelController: cubit.modelController,
+          serialController: cubit.serialController,
+          noteController: cubit.noteController,
+          formKey: cubit.formKey,
+        ),
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context) {
+    final cubit = context.read<AssetsCubit>();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: cardBg,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Delete Asset',
+          style: TextStyle(color: primaryText, fontSize: 15, fontWeight: FontWeight.w600),
+        ),
+        content: Text(
+          'Are you sure you want to delete "${asset.name}"?',
+          style: const TextStyle(color: secondaryText, fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: secondaryText)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              // TODO: cubit.deleteAsset(id: asset.id);
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     const color = primaryBlue;
 
     return GestureDetector(
-      onTap: () {
-        // context.go('/customer/assets/${asset.id}');
-      },
+      onTap: () => _openEditSheet(context),
+      onLongPress: () => _confirmDelete(context),
       child: Container(
         decoration: BoxDecoration(
           color: cardBg,
@@ -46,122 +99,71 @@ class AssetCard extends StatelessWidget {
                       // ── Top row ──────────────────────────────────
                       Row(
                         children: [
-                          // Icon box
                           Container(
                             padding: const EdgeInsets.all(7),
                             decoration: BoxDecoration(
                               color: color.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Icon(
-                              Icons.build_outlined,
-                              color: color,
-                              size: 14,
-                            ),
+                            child: const Icon(Icons.build_outlined, color: color, size: 14),
                           ),
                           const SizedBox(width: 10),
-
-                          // Serial number
                           Text(
                             asset.serialNumber ?? 'No Serial',
                             style: const TextStyle(
-                              color: secondaryText,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 1.5,
+                              color: secondaryText, fontSize: 10,
+                              fontWeight: FontWeight.w700, letterSpacing: 1.5,
                               fontFamily: 'monospace',
                             ),
                           ),
                           const Spacer(),
-
-                          // Brand badge
                           if (asset.brand != null)
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
                                 color: color.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(6),
                               ),
-                              child: Text(
-                                asset.brand!,
-                                style: const TextStyle(
-                                  color: color,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                              child: Text(asset.brand!,
+                                style: const TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w700),
                               ),
                             ),
                         ],
                       ),
-
                       const SizedBox(height: 10),
 
-                      // ── Name ─────────────────────────────────────
-                      Text(
-                        asset.name,
-                        style: const TextStyle(
-                          color: primaryText,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      Text(asset.name,
+                        style: const TextStyle(color: primaryText, fontSize: 14, fontWeight: FontWeight.w600),
                       ),
 
-                      // ── Note ─────────────────────────────────────
                       if (asset.note != null && asset.note!.isNotEmpty) ...[
                         const SizedBox(height: 4),
-                        Text(
-                          asset.note!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: secondaryText,
-                            fontSize: 12,
-                          ),
+                        Text(asset.note!,
+                          maxLines: 1, overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: secondaryText, fontSize: 12),
                         ),
                       ],
-
                       const SizedBox(height: 10),
 
-                      // ── Model row ─────────────────────────────────
                       Row(
                         children: [
                           if (asset.model != null) ...[
-                            const Icon(
-                              Icons.memory_outlined,
-                              size: 12,
-                              color: secondaryText,
-                            ),
+                            const Icon(Icons.memory_outlined, size: 12, color: secondaryText),
                             const SizedBox(width: 4),
-                            Text(
-                              asset.model!,
-                              style: const TextStyle(
-                                color: secondaryText,
-                                fontSize: 11,
-                              ),
+                            Text(asset.model!,
+                              style: const TextStyle(color: secondaryText, fontSize: 11),
                             ),
                           ],
                           const Spacer(),
-                          // Asset ID chip
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
                               color: chipBg,
                               borderRadius: BorderRadius.circular(6),
                               border: Border.all(color: chipBorder),
                             ),
-                            child: Text(
-                              '#${asset.id}',
-                              style: const TextStyle(
-                                color: secondaryText,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                              ),
+                            child: Text('#${asset.id}',
+                              style: const TextStyle(color: secondaryText, fontSize: 10, fontWeight: FontWeight.w600),
                             ),
                           ),
                         ],

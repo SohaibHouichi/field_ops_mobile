@@ -27,6 +27,7 @@ Map<String, ShellRequirementModel> shellConfigRoute = {
     title: '',
     showBottomNavigationBar: true,
     showFloatingButton: true,
+    isAssetTab: true,
   ),
   //   customerAssetsPagePath: ShellRequirementModel(
   //   title: '',

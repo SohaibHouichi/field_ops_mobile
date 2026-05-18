@@ -1,9 +1,9 @@
-import 'package:field_ops/features/customer/domain/entities/embedded/assets_embedded_entity.dart';
+import 'package:field_ops/features/assets/domain/entities/assets_entity.dart';
 import 'package:field_ops/features/customer/presentation/widgets/assets_embedded_widgets/embedded_assets_sub_widgets/assets_card_sub_widget.dart';
 import 'package:flutter/material.dart';
 
 class CustomerAssetsListWidget extends StatelessWidget {
-  final List<AssetEmbeddedEntity> assets;
+  final List<AssetEntity> assets;
   const CustomerAssetsListWidget({super.key, required this.assets});
 
   @override

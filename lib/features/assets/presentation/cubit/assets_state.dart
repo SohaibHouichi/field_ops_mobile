@@ -12,9 +12,16 @@ final class AssetsLoading extends AssetsState {
   const AssetsLoading();
 }
 
+final class AssetsSearchSuccess extends AssetsState {
+  final List<AssetEntity> assets; 
+  const AssetsSearchSuccess(this.assets);
+}
 final class AssetsSuccess extends AssetsState {
-  final List<AssetEmbeddedEntity> assets; 
-  const AssetsSuccess(this.assets);
+  final AssetEntity asset ; 
+  const AssetsSuccess(this.asset);
+}
+final class EditAssetsSuccessfuly extends AssetsState {
+  const EditAssetsSuccessfuly();
 }
 
 final class AssetsError extends AssetsState {

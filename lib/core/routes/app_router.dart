@@ -90,8 +90,11 @@ GoRouter _buildRouter() {
 
       // ── Customer shell ────────────────────────────────────────────
       StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) => BlocProvider.value(
-          value: customerCubit,
+        builder: (context, state, navigationShell) => MultiBlocProvider(
+          providers:[ 
+            BlocProvider.value(value: customerCubit),
+            BlocProvider.value(value: assetsCubit)
+          ],
           child: MainShellRouter(navigationShell: navigationShell),
         ),
         branches: [
@@ -118,10 +121,8 @@ GoRouter _buildRouter() {
               GoRoute(
                 path: customerAssetsPagePath,    // e.g. '/customer/assets'
                 name: customerAssetsPageName,
-                builder: (context, state) => BlocProvider.value(
-                  value: assetsCubit,
-                  child:  AssetsScreen(),
-                ),
+                builder: (context, state) => AssetsScreen(),
+                  
               ),
             ],
           ),

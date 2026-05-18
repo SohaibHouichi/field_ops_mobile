@@ -4,6 +4,8 @@ import 'package:field_ops/core/di/di_container.dart';
 import 'package:field_ops/core/navigation/nav_items_config.dart';
 import 'package:field_ops/core/widgets/pulse_dot_widget.dart';
 import 'package:field_ops/core/widgets/show_tenant_info_bottom_sheet.dart';
+import 'package:field_ops/features/assets/presentation/cubit/assets_cubit.dart';
+import 'package:field_ops/features/assets/presentation/widgets/sheets/add_asset_sheet.dart';
 import 'package:field_ops/features/auth/domain/entities/user_entity.dart';
 import 'package:field_ops/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:flutter/material.dart';
@@ -14,15 +16,11 @@ import 'package:field_ops/core/routes/shell_/shell_config.dart';
 class MainShellRouter extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
-  const MainShellRouter({
-    super.key,
-    required this.navigationShell,
-  });
+  const MainShellRouter({super.key, required this.navigationShell});
 
   @override
   Widget build(BuildContext context) {
-    final config = DiContainer.getIt<ShellConfig>()
-        .routeConfiguration(context);
+    final config = DiContainer.getIt<ShellConfig>().routeConfiguration(context);
 
     final authState = context.watch<AuthCubit>().state;
 
@@ -43,10 +41,27 @@ class MainShellRouter extends StatelessWidget {
         : CustomerNavItems.items;
 
     return Scaffold(
-      floatingActionButton: config.showFloatingButton
+      floatingActionButton: config.showFloatingButton && config.isAssetTab
           ? FloatingActionButton(
               onPressed: () {
-                // Handle FAB action
+                final cubit = context.read<AssetsCubit>();
+                cubit.clearForm();
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (_) => BlocProvider.value(
+                    value: cubit,
+                    child: AddAssetsSheet(
+                      nameController: cubit.nameController,
+                      brandController: cubit.brandController,
+                      modelController: cubit.modelController,
+                      serialController: cubit.serialController,
+                      noteController: cubit.noteController,
+                      formKey: cubit.formKey,
+                    ),
+                  ),
+                );
               },
               backgroundColor: primaryBlue,
               child: const Icon(Icons.add, color: Colors.white),
@@ -61,9 +76,7 @@ class MainShellRouter extends StatelessWidget {
         titleSpacing: 0,
         leadingWidth: 0,
         leading: const SizedBox.shrink(),
-        shape: Border(
-          bottom: BorderSide(color: inputBorder),
-        ),
+        shape: Border(bottom: BorderSide(color: inputBorder)),
 
         title: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -197,22 +210,16 @@ class MainShellRouter extends StatelessWidget {
 
                       final RenderBox overlay =
                           Navigator.of(
-                            btnContext,
-                          ).overlay!.context.findRenderObject()
+                                btnContext,
+                              ).overlay!.context.findRenderObject()
                               as RenderBox;
 
-                      final RelativeRect position =
-                          RelativeRect.fromRect(
+                      final RelativeRect position = RelativeRect.fromRect(
                         Rect.fromPoints(
-                          button.localToGlobal(
-                            Offset.zero,
-                            ancestor: overlay,
-                          ),
+                          button.localToGlobal(Offset.zero, ancestor: overlay),
 
                           button.localToGlobal(
-                            button.size.bottomRight(
-                              Offset.zero,
-                            ),
+                            button.size.bottomRight(Offset.zero),
                             ancestor: overlay,
                           ),
                         ),
@@ -267,7 +274,6 @@ class MainShellRouter extends StatelessWidget {
                               ),
                             ),
                           ),
-
                         ],
                       );
                     },
@@ -307,9 +313,7 @@ class MainShellRouter extends StatelessWidget {
           ? Container(
               decoration: BoxDecoration(
                 color: cardBg,
-                border: Border(
-                  top: BorderSide(color: inputBorder),
-                ),
+                border: Border(top: BorderSide(color: inputBorder)),
               ),
 
               child: BottomNavigationBar(
@@ -335,8 +339,7 @@ class MainShellRouter extends StatelessWidget {
                 onTap: (value) {
                   navigationShell.goBranch(
                     value,
-                    initialLocation:
-                        value == navigationShell.currentIndex,
+                    initialLocation: value == navigationShell.currentIndex,
                   );
                 },
 

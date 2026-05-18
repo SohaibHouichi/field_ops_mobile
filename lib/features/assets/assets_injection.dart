@@ -1,6 +1,9 @@
 import 'package:field_ops/features/assets/data/data_source/assets_remote_datasource.dart';
 import 'package:field_ops/features/assets/data/repository/assets_repository_impl.dart';
 import 'package:field_ops/features/assets/domain/repository/assets_repository.dart';
+import 'package:field_ops/features/assets/domain/usecases/add_assets_usecase.dart';
+import 'package:field_ops/features/assets/domain/usecases/edit_assets_usecase.dart';
+import 'package:field_ops/features/assets/domain/usecases/get_assets_by_customer_id_usecase.dart';
 import 'package:field_ops/features/assets/domain/usecases/search_assets_usecase.dart';
 import 'package:field_ops/features/assets/presentation/cubit/assets_cubit.dart';
 import 'package:get_it/get_it.dart';
@@ -18,8 +21,19 @@ void setupAssets(GetIt getIt) {
   getIt.registerLazySingleton(
     () => SearchAssetsUsecase(getIt<AssetsRepository>()),
   );
+   getIt.registerLazySingleton(
+    () => AddAssetsUsecase(getIt<AssetsRepository>()),
+  );
+     getIt.registerLazySingleton(
+    () => GetAssetsByCustomerIdUseCase(getIt<AssetsRepository>()),
+  );
+     getIt.registerLazySingleton(
+    () => EditAssetsUsecase(getIt<AssetsRepository>()),
+  );
   // ----------------------- CUBIT --------------------
   getIt.registerFactory(
-    ()=>AssetsCubit(getIt<SearchAssetsUsecase>())
+    () => AssetsCubit(getIt<SearchAssetsUsecase>(), getIt<AddAssetsUsecase>(), 
+   getIt<GetAssetsByCustomerIdUseCase>() , getIt<EditAssetsUsecase>()
+    ),
   );
 }

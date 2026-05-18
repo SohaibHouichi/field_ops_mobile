@@ -20,3 +20,4 @@ const Color cardBg       = Color(0xFFFFFFFF);
 const Color accentDim    = Color(0x261E7BEA);
 const Color chipBg       = Color(0xFFE8F2FD);
 const Color chipBorder   = Color(0xFFB5D4F4);
+const Color scaffoldBg = Color(0xFF0F1117); // غيّر اللون حسب تصميمك

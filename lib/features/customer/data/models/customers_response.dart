@@ -1,4 +1,4 @@
-import 'package:field_ops/features/customer/data/models/embedded/assets_embedded_response.dart';
+import 'package:field_ops/features/assets/data/models/assets_response_model.dart';
 import 'package:field_ops/features/customer/data/models/embedded/service_request_embedded_response.dart';
 import 'package:field_ops/features/customer/domain/entities/customer_entity.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -17,7 +17,7 @@ class CustomersResponse {
   final String? addressId;
   final String? addressLabel;
   final String? fullAddressLine;
-  final List<AssetEmbeddedResponse>? assetsList;
+  final List<AssetResponse>? assetsList;
   final List<ServiceRequestEmbeddedResponse>? serviceRequestsList;
 
   const CustomersResponse({

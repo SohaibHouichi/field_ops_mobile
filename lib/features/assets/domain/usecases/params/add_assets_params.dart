@@ -9,9 +9,9 @@ class AddAssetsParams {
   const AddAssetsParams({
     required this.name,
     required this.customerId,
-    this.brand,
-    this.model,
-    this.note,
-    this.serialNumber,
+    required this.brand,
+    required this.model,
+    required this.note,
+    required this.serialNumber,
   });
 }

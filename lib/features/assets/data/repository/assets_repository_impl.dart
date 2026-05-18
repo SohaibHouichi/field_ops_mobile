@@ -4,7 +4,6 @@ import 'package:field_ops/features/assets/domain/entities/assets_entity.dart';
 import 'package:field_ops/features/assets/domain/repository/assets_repository.dart';
 import 'package:field_ops/features/assets/domain/usecases/params/add_assets_params.dart';
 import 'package:field_ops/features/assets/domain/usecases/params/update_assets_params.dart';
-import 'package:field_ops/features/customer/domain/entities/embedded/assets_embedded_entity.dart';
 
 class AssetsRepositoryImpl implements AssetsRepository {
   final AssetsRemoteDataSource remoteDataSource;
@@ -15,6 +14,7 @@ class AssetsRepositoryImpl implements AssetsRepository {
     customerId: params.customerId,
     brand: params.brand,
     model: params.model,
+    note: params.note,
     serialNumber: params.serialNumber,
   );
 
@@ -34,9 +34,18 @@ class AssetsRepositoryImpl implements AssetsRepository {
   }
 
   @override
-  Future<AssetEntity> getAssets() async {
-    final res = await remoteDataSource.getAssets();
-    return res.toEntity();
+  Future<List<AssetEntity>> getAssetsByCustomerId(int id) async {
+    final res = await remoteDataSource.getAssetsByCustomerId(id);
+    return res.map(
+      (e) => AssetEntity(
+        id: e.id,
+        name: e.name,
+        brand: e.brand,
+        note: e.note,
+        model: e.model,
+        serialNumber: e.serialNumber,
+      ),
+    ).toList();
   }
 
   @override
@@ -48,16 +57,20 @@ class AssetsRepositoryImpl implements AssetsRepository {
     }
   }
 
- @override
-Future<List<AssetEmbeddedEntity>> searchAssets(String name) async {
-  final res = await remoteDataSource.searchAssets(name);
-  return res.map((e) => AssetEmbeddedEntity(
-    id: e.id,
-    name: e.name,
-    serialNumber: e.serialNumber,
-    brand: e.brand,
-    model: e.model,
-    note: e.note,
-  )).toList();
-}
+  @override
+  Future<List<AssetEntity>> searchAssets(String name) async {
+    final res = await remoteDataSource.searchAssets(name);
+    return res
+        .map(
+          (e) => AssetEntity(
+            id: e.id,
+            name: e.name,
+            serialNumber: e.serialNumber,
+            brand: e.brand,
+            model: e.model,
+            note: e.note,
+          ),
+        )
+        .toList();
+  }
 }

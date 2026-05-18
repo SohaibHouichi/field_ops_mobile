@@ -1,13 +1,14 @@
 // lib/features/customer/presentation/widgets/dashboard_widgets/customer_assets_widget.dart
 
 import 'package:field_ops/core/constants/app_color.dart';
-import 'package:field_ops/features/customer/domain/entities/embedded/assets_embedded_entity.dart';
+import 'package:field_ops/features/assets/domain/entities/assets_entity.dart';
 import 'package:field_ops/features/customer/presentation/widgets/assets_embedded_widgets/embedded_assets_sub_widgets/assets_Item_sub_widget.dart';
 import 'package:field_ops/features/customer/presentation/widgets/assets_embedded_widgets/embedded_assets_sub_widgets/assets_view_more_button_sub_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class CustomerAssetsWidget extends StatelessWidget {
-  final List<AssetEmbeddedEntity> assets;
+  final List<AssetEntity> assets;
   const CustomerAssetsWidget({super.key, required this.assets});
 
   static const int _previewLimit = 3;
@@ -72,7 +73,7 @@ class CustomerAssetsWidget extends StatelessWidget {
               ViewMoreButton(
                 remaining: remaining,
                 onTap: () {
-                  //context.go('/customer/assets');
+                  context.go('/customer/assets');
                 },
               ),
             ],
