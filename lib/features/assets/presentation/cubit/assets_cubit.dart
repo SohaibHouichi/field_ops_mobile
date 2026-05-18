@@ -1,10 +1,12 @@
 import 'package:field_ops/features/assets/domain/entities/assets_entity.dart';
 import 'package:field_ops/features/assets/domain/usecases/add_assets_usecase.dart';
+import 'package:field_ops/features/assets/domain/usecases/delete_assets_usecase.dart';
 import 'package:field_ops/features/assets/domain/usecases/edit_assets_usecase.dart';
 import 'package:field_ops/features/assets/domain/usecases/get_assets_by_customer_id_usecase.dart';
 import 'package:field_ops/features/assets/domain/usecases/params/add_assets_params.dart';
 import 'package:field_ops/features/assets/domain/usecases/params/update_assets_params.dart';
 import 'package:field_ops/features/assets/domain/usecases/search_assets_usecase.dart';
+import 'package:field_ops/features/assets/presentation/widgets/sheets/add_asset_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -13,14 +15,16 @@ part 'assets_state.dart';
 class AssetsCubit extends Cubit<AssetsState> {
   final SearchAssetsUsecase _searchAssetsUsecase;
   final AddAssetsUsecase _addAssetsUsecase;
-  final GetAssetsByCustomerIdUseCase _assetsByCustomerIdUseCase; // inject CustomerCubit
+  final GetAssetsByCustomerIdUseCase _assetsByCustomerIdUseCase;
   final EditAssetsUsecase _editAssetsUsecase;
+  final DeleteAssetsUsecase _deleteAssetsUsecase;
 
   AssetsCubit(
     this._searchAssetsUsecase,
     this._addAssetsUsecase,
     this._assetsByCustomerIdUseCase,
     this._editAssetsUsecase,
+    this._deleteAssetsUsecase,
   ) : super(const AssetsInitial());
 
   // ── Search controller ─────────────────────────────────────────────
@@ -37,6 +41,45 @@ class AssetsCubit extends Cubit<AssetsState> {
   // ── Assets cache ──────────────────────────────────────────────────
   List<AssetEntity>? _allAssets;
   List<AssetEntity>? get allAssets => _allAssets;
+
+  // ── Open asset sheet (create / edit) ──────────────────────────────
+  /// Opens the asset bottom sheet.
+  /// - If [asset] is null  -> CREATE mode (empty form)
+  /// - If [asset] is given -> EDIT mode (pre-filled form)
+  void openAssetSheet(BuildContext context, {AssetEntity? asset}) {
+    final isEdit = asset != null;
+
+    if (!isEdit) {
+      clearForm();
+    } else {
+      nameController.text = asset.name;
+      brandController.text = asset.brand ?? '';
+      modelController.text = asset.model ?? '';
+      serialController.text = asset.serialNumber ?? '';
+      noteController.text = asset.note ?? '';
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      useRootNavigator: true,
+      builder: (_) => BlocProvider.value(
+        value: this,
+        child: AddAssetsSheet(
+          asset: asset,
+          nameController: nameController,
+          brandController: brandController,
+          modelController: modelController,
+          serialController: serialController,
+          noteController: noteController,
+          formKey: formKey,
+        ),
+      ),
+    ).whenComplete(() {
+      if (isEdit) clearForm();
+    });
+  }
 
   // ── Add asset ─────────────────────────────────────────────────────
   Future<void> addAssets({
@@ -84,11 +127,23 @@ class AssetsCubit extends Cubit<AssetsState> {
           model: model,
           note: note,
           serialNumber: serialNumber,
-          customerId: 25
+          customerId: 25,
         ),
       );
 
       emit(EditAssetsSuccessfuly());
+      await refreshAssets();
+    } catch (e) {
+      emit(AssetsError(e.toString()));
+    }
+  }
+
+  // ── delete asset ─────────────────────────────────────────────────────
+  Future<void> deleteAssets(int id) async {
+    emit(AssetsLoading());
+    try {
+      await _deleteAssetsUsecase(id);
+      emit(DeleteAssetsSuccessfuly());
       await refreshAssets();
     } catch (e) {
       emit(AssetsError(e.toString()));

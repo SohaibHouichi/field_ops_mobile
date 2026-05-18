@@ -63,7 +63,7 @@ class AssetsScreen extends StatelessWidget {
                           Expanded(
                             child: assetsState is AssetsLoading
                                 ? const Center(child: CircularProgressIndicator())
-                                : assets.isEmpty
+                                : assetsState is AssetsError
                                     ? const Center(child: Text('No assets found'))
                                     : CustomerAssetsListWidget(assets: assets),
                           ),

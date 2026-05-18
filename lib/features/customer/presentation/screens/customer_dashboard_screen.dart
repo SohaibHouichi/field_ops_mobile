@@ -1,4 +1,6 @@
 import 'package:field_ops/core/constants/app_color.dart';
+import 'package:field_ops/features/assets/domain/entities/assets_entity.dart';
+import 'package:field_ops/features/assets/presentation/cubit/assets_cubit.dart';
 import 'package:field_ops/features/customer/domain/entities/customer_entity.dart';
 import 'package:field_ops/features/customer/presentation/cubit/customer_cubit.dart';
 import 'package:field_ops/features/customer/presentation/widgets/assets_embedded_widgets/customer_assets_widget.dart';
@@ -10,21 +12,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CustomerDashboard extends StatelessWidget {
   const CustomerDashboard({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
-      final state = context.read<CustomerCubit>().state;
-      if (state is! CustomerSuccess && state is! CustomerLoading) {
+    final state = context.read<CustomerCubit>().state;
+    if (state is! CustomerSuccess && state is! CustomerLoading) {
       context.read<CustomerCubit>().getCustomerById(id: 25);
-      }
+    }
     final customer = context.select((CustomerCubit cubit) {
       final state = cubit.state;
       if (state is CustomerSuccess) return state.customer;
       return null;
     });
-    
 
-    
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       children: [
@@ -40,35 +40,43 @@ class CustomerDashboard extends StatelessWidget {
         const SizedBox(height: 20),
 
         // ── Summary cards ─────────────────────────────────────────
-        Row(
-          children: [
-            Expanded(
-              child: SummaryCard(
-                icon: Icons.build_circle_outlined,
-                label: 'Open\nRequests',
-                value: _openRequests(customer),
-                accent: primaryBlue,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: SummaryCard(
-                icon: Icons.check_circle_outline,
-                label: 'Completed\nThis Month',
-                value: _completedRequests(customer),
-                accent: const Color(0xFF4ADE80),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: SummaryCard(
-                icon: Icons.inventory_2_outlined,
-                label: 'My\nAssets',
-                value: '${customer?.assetsList.length ?? 0}',
-                accent: const Color(0xFFFBBF24),
-              ),
-            ),
-          ],
+        // Only the "My Assets" card depends on assets, so the whole
+        // row is wrapped to keep the asset count in sync once assets
+        // have been loaded at least once.
+        BlocBuilder<AssetsCubit, AssetsState>(
+          builder: (context, _) {
+            final assets = _resolveAssets(context, customer);
+            return Row(
+              children: [
+                Expanded(
+                  child: SummaryCard(
+                    icon: Icons.build_circle_outlined,
+                    label: 'Open\nRequests',
+                    value: _openRequests(customer),
+                    accent: primaryBlue,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: SummaryCard(
+                    icon: Icons.check_circle_outline,
+                    label: 'Completed\nThis Month',
+                    value: _completedRequests(customer),
+                    accent: const Color(0xFF4ADE80),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: SummaryCard(
+                    icon: Icons.inventory_2_outlined,
+                    label: 'My\nAssets',
+                    value: '${assets.length}',
+                    accent: const Color(0xFFFBBF24),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
 
         const SizedBox(height: 20),
@@ -121,11 +129,30 @@ class CustomerDashboard extends StatelessWidget {
         const SectionHeader(title: 'ASSETS'),
         const SizedBox(height: 12),
 
-       CustomerAssetsWidget(assets: customer?.assetsList ?? []),
+        BlocBuilder<AssetsCubit, AssetsState>(
+          builder: (context, _) {
+            final assets = _resolveAssets(context, customer);
+            return CustomerAssetsWidget(assets: assets);
+          },
+        ),
 
         const SizedBox(height: 32),
       ],
     );
+  }
+
+  /// Option 3 logic:
+  /// - Before AssetsCubit has ever loaded assets (allAssets == null) ->
+  ///   use the customer's own list (original behavior).
+  /// - Once assets have been loaded at least once -> use AssetsCubit's
+  ///   live list, which stays in sync after any add/edit/delete.
+  List<AssetEntity> _resolveAssets(
+    BuildContext context,
+    CustomersEntity? customer,
+  ) {
+    final loaded = context.read<AssetsCubit>().allAssets;
+    if (loaded != null) return loaded;
+    return customer?.assetsList ?? [];
   }
 
   String _openRequests(CustomersEntity? customer) {

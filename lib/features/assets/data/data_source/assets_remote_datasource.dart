@@ -15,7 +15,7 @@ class AssetsRemoteDataSourceImpl implements AssetsRemoteDataSource {
   AssetsRemoteDataSourceImpl(this.dioClient);
   @override
   Future<List<AssetResponse>> getAssetsByCustomerId(int id) async {
-    final res = await dioClient.get('/v1/assets?filter[customerId]=${id}');
+    final res = await dioClient.get('/v1/assets?filter[customerId].Value = ${id}');
     return (res.data['items'] as List)
         .map((e) => AssetResponse.fromJson(e as Map<String, dynamic>))
         .toList();

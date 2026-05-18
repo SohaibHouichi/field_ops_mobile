@@ -23,6 +23,9 @@ final class AssetsSuccess extends AssetsState {
 final class EditAssetsSuccessfuly extends AssetsState {
   const EditAssetsSuccessfuly();
 }
+final class DeleteAssetsSuccessfuly extends AssetsState {
+  const DeleteAssetsSuccessfuly();
+}
 
 final class AssetsError extends AssetsState {
   final String message;

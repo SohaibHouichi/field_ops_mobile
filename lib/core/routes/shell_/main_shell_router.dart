@@ -5,7 +5,6 @@ import 'package:field_ops/core/navigation/nav_items_config.dart';
 import 'package:field_ops/core/widgets/pulse_dot_widget.dart';
 import 'package:field_ops/core/widgets/show_tenant_info_bottom_sheet.dart';
 import 'package:field_ops/features/assets/presentation/cubit/assets_cubit.dart';
-import 'package:field_ops/features/assets/presentation/widgets/sheets/add_asset_sheet.dart';
 import 'package:field_ops/features/auth/domain/entities/user_entity.dart';
 import 'package:field_ops/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:flutter/material.dart';
@@ -44,24 +43,7 @@ class MainShellRouter extends StatelessWidget {
       floatingActionButton: config.showFloatingButton && config.isAssetTab
           ? FloatingActionButton(
               onPressed: () {
-                final cubit = context.read<AssetsCubit>();
-                cubit.clearForm();
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (_) => BlocProvider.value(
-                    value: cubit,
-                    child: AddAssetsSheet(
-                      nameController: cubit.nameController,
-                      brandController: cubit.brandController,
-                      modelController: cubit.modelController,
-                      serialController: cubit.serialController,
-                      noteController: cubit.noteController,
-                      formKey: cubit.formKey,
-                    ),
-                  ),
-                );
+                context.read<AssetsCubit>().openAssetSheet(context);
               },
               backgroundColor: primaryBlue,
               child: const Icon(Icons.add, color: Colors.white),

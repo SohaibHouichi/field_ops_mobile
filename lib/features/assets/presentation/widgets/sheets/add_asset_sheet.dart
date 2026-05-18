@@ -1,6 +1,4 @@
 import 'package:field_ops/core/constants/app_color.dart';
-import 'package:field_ops/core/di/di_container.dart';
-import 'package:field_ops/core/routes/shell_/shell_config.dart';
 import 'package:field_ops/features/assets/domain/entities/assets_entity.dart';
 import 'package:field_ops/features/assets/presentation/cubit/assets_cubit.dart';
 import 'package:flutter/material.dart';
@@ -30,18 +28,7 @@ class AddAssetsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final config = DiContainer.getIt<ShellConfig>().routeConfiguration(context);
     final cubit = context.read<AssetsCubit>();
-
-    // fill fields if edit mode
-    if (_isEdit) {
-      config.showFloatingButton = false;
-      nameController.text = asset!.name;
-      brandController.text = asset!.brand ?? '';
-      modelController.text = asset!.model ?? '';
-      serialController.text = asset!.serialNumber ?? '';
-      noteController.text = asset!.note ?? '';
-    }
 
     return DraggableScrollableSheet(
       initialChildSize: 0.75,
@@ -144,13 +131,38 @@ class AddAssetsSheet extends StatelessWidget {
                 // ── Submit ─────────────────────────────────────────
                 BlocConsumer<AssetsCubit, AssetsState>(
                   listener: (context, state) {
-                    if (state is AssetsSuccess) Navigator.pop(context);
-                    if (state is EditAssetsSuccessfuly) Navigator.pop(context);
+                    if (state is AssetsSuccess) {
+                      Navigator.pop(context);
+                       ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Add has been successfuly'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                    if (state is EditAssetsSuccessfuly) {
+                      Navigator.pop(context);
+                       ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Edit has been successfuly'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
                     if (state is AssetsError) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(state.message),
+                          content: Text('Faild do actions with assets'),
                           backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                     if (state is DeleteAssetsSuccessfuly) {
+                      Navigator.pop(context);
+                       ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Delete has been successfuly'),
+                          backgroundColor: Colors.green,
                         ),
                       );
                     }
@@ -165,7 +177,6 @@ class AddAssetsSheet extends StatelessWidget {
                             : () {
                                 if (formKey.currentState!.validate()) {
                                   if (_isEdit) {
-                                  
                                     cubit.editAssets(
                                       id: asset!.id,
                                       name: nameController.text.trim(),
@@ -175,7 +186,6 @@ class AddAssetsSheet extends StatelessWidget {
                                       serialNumber: serialController.text
                                           .trim(),
                                     );
-                                      config.showFloatingButton = true;
                                   } else {
                                     cubit.addAssets(
                                       name: nameController.text.trim(),
