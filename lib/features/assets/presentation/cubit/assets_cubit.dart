@@ -1,3 +1,4 @@
+import 'package:field_ops/core/helpers/shared_pref_helper.dart';
 import 'package:field_ops/features/assets/domain/entities/assets_entity.dart';
 import 'package:field_ops/features/assets/domain/usecases/add_assets_usecase.dart';
 import 'package:field_ops/features/assets/domain/usecases/delete_assets_usecase.dart';
@@ -41,6 +42,19 @@ class AssetsCubit extends Cubit<AssetsState> {
   // ── Assets cache ──────────────────────────────────────────────────
   List<AssetEntity>? _allAssets;
   List<AssetEntity>? get allAssets => _allAssets;
+ List<AssetEntity> fakeAssetsForSkeletonizer = List.generate(
+  6,
+  (index) => AssetEntity(
+    // every required field filled with a harmless placeholder:
+    id: 0,
+    name: 'xxxxxxxxxxxx',
+    // number fields  -> 0
+    // string fields  -> 'xxxxx'  (give some length so the skeleton bar has width)
+    // bool fields    -> false
+    // date fields    -> DateTime.now()
+    // nested objects -> a fake instance of that object too
+  ),
+);
 
   // ── Open asset sheet (create / edit) ──────────────────────────────
   /// Opens the asset bottom sheet.
@@ -90,11 +104,12 @@ class AssetsCubit extends Cubit<AssetsState> {
     required String serialNumber,
   }) async {
     emit(const AssetsLoading());
+    final custId = await getCustomerId();
     try {
       final res = await _addAssetsUsecase(
         AddAssetsParams(
           name: name,
-          customerId: 25,
+          customerId: custId,
           brand: brand,
           model: model,
           note: note,
@@ -118,6 +133,7 @@ class AssetsCubit extends Cubit<AssetsState> {
     required String serialNumber,
   }) async {
     emit(const AssetsLoading());
+    final custId = await getCustomerId();
     try {
       await _editAssetsUsecase(
         id,
@@ -127,7 +143,7 @@ class AssetsCubit extends Cubit<AssetsState> {
           model: model,
           note: note,
           serialNumber: serialNumber,
-          customerId: 25,
+          customerId: custId,
         ),
       );
 
@@ -153,7 +169,8 @@ class AssetsCubit extends Cubit<AssetsState> {
   // ── Refresh assets ──────────────────────────────
   Future<void> refreshAssets() async {
     try {
-      final assets = await _assetsByCustomerIdUseCase(25);
+      final custId = await getCustomerId();
+      final assets = await _assetsByCustomerIdUseCase(custId);
       setAssets(assets);
     } catch (e) {
       emit(AssetsError(e.toString()));
@@ -184,6 +201,12 @@ class AssetsCubit extends Cubit<AssetsState> {
       emit(AssetsError(e.toString()));
     }
   }
+  // ── get customer id ──────────────────────────────────────────────────
+  Future<int> getCustomerId () async{
+    final id  = await SharedPrefHelper.getInt(LocalStorageKeys.userId);
+    return id.toInt();
+  }
+
 
   // ── Clear search ──────────────────────────────────────────────────
   void clearSearch() {

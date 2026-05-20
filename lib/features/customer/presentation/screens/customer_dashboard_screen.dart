@@ -9,6 +9,7 @@ import 'package:field_ops/features/customer/presentation/widgets/service_request
 import 'package:field_ops/features/technician/presentation/screens/technician_dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class CustomerDashboard extends StatelessWidget {
   const CustomerDashboard({super.key});
@@ -17,7 +18,7 @@ class CustomerDashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.read<CustomerCubit>().state;
     if (state is! CustomerSuccess && state is! CustomerLoading) {
-      context.read<CustomerCubit>().getCustomerById(id: 25);
+      context.read<CustomerCubit>().getCustomerById();
     }
     final customer = context.select((CustomerCubit cubit) {
       final state = cubit.state;
@@ -67,11 +68,14 @@ class CustomerDashboard extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: SummaryCard(
-                    icon: Icons.inventory_2_outlined,
-                    label: 'My\nAssets',
-                    value: '${assets.length}',
-                    accent: const Color(0xFFFBBF24),
+                  child: Skeletonizer(
+                    enabled: state is AssetsLoading,
+                    child: SummaryCard(
+                      icon: Icons.inventory_2_outlined,
+                      label: 'My\nAssets',
+                      value: state is AssetsLoading ? '00' : '${assets.length}',
+                      accent: const Color(0xFFFBBF24),
+                    ),
                   ),
                 ),
               ],
@@ -130,9 +134,17 @@ class CustomerDashboard extends StatelessWidget {
         const SizedBox(height: 12),
 
         BlocBuilder<AssetsCubit, AssetsState>(
-          builder: (context, _) {
+          builder: (context, state) {
             final assets = _resolveAssets(context, customer);
-            return CustomerAssetsWidget(assets: assets);
+
+            return Skeletonizer(
+              enabled: state is AssetsLoading,
+              child: CustomerAssetsWidget(
+                assets: state is AssetsLoading
+                    ? context.read<AssetsCubit>().fakeAssetsForSkeletonizer
+                    : assets,
+              ),
+            );
           },
         ),
 

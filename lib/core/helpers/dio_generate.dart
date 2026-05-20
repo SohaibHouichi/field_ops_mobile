@@ -55,16 +55,16 @@ class DioGenerate {
     if (kIsWeb) {
       // Web-specific headers for proper UTF-8 handling
       _dio!.options.headers = {
-        'Content-Type': 'application/json; charset=utf-8',
-        'Accept': 'application/json; charset=utf-8',
-        'Accept-Charset': 'utf-8',
+        // 'Content-Type': 'application/json; charset=utf-8',
+        // 'Accept': 'application/json; charset=utf-8',
+        // 'Accept-Charset': 'utf-8',
         // Authorization header will be added by AuthInterceptor
       };
     } else {
       // Mobile headers
       _dio!.options.headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        // 'Content-Type': 'application/json',
+        // 'Accept': 'application/json',
         // Authorization header will be added by AuthInterceptor
       };
     }

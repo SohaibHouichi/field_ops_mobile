@@ -8,6 +8,7 @@ part 'login_response_model.g.dart';
 class LoginResponseModel {
   final int userId;
   final String username;
+  final String fullName;
   final String email;
   final String role;
   final String accessToken;
@@ -16,6 +17,7 @@ class LoginResponseModel {
   const LoginResponseModel({
     required this.userId,
     required this.username,
+    required this.fullName,
     required this.email,
     required this.role,
     required this.accessToken,
@@ -33,6 +35,7 @@ class LoginResponseModel {
     return UserEntity(
       userId: userId,
       username: username,
+      fullName: fullName,
       email: email,
       role: parsedRole,
       accessToken: accessToken,

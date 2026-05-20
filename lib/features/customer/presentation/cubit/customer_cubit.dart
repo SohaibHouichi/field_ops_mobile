@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:field_ops/core/helpers/shared_pref_helper.dart';
 import 'package:field_ops/features/customer/domain/entities/customer_entity.dart';
 import 'package:field_ops/features/customer/domain/usecases/create_customer_usecase.dart';
 import 'package:field_ops/features/customer/domain/usecases/get_customer_by_id_usecase.dart';
@@ -17,11 +18,16 @@ class CustomerCubit extends Cubit<CustomerState> {
       : _createCustomerUsecase = createCustomerUsecase,
         _getCustomerByIdUsecase = getCustomerByIdUsecase,
         super(CustomerInitial());
+
+  Future<int> getCustomerId ()  async{
+    final id = await SharedPrefHelper.getInt(LocalStorageKeys.userId);
+    return id.toInt();
+  }
   // getting customer by id -----------
-  Future<CustomersEntity> getCustomerById({required int id}) async {
+  Future<CustomersEntity> getCustomerById() async {
     emit(CustomerLoading());
     try {
-      final customer = await _getCustomerByIdUsecase(id: id);
+      final customer = await _getCustomerByIdUsecase(id: await getCustomerId());
       emit(CustomerSuccess(customer));
       return customer;
     } catch (e) {

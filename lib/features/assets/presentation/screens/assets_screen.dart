@@ -6,6 +6,7 @@ import 'package:field_ops/features/customer/presentation/cubit/customer_cubit.da
 import 'package:field_ops/features/customer/presentation/widgets/assets_embedded_widgets/customer_assets_list_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class AssetsScreen extends StatelessWidget {
   const AssetsScreen({super.key});
@@ -61,11 +62,16 @@ class AssetsScreen extends StatelessWidget {
                           CountHeader(count: assets.length, label: 'Assets'),
                           const SizedBox(height: 20),
                           Expanded(
-                            child: assetsState is AssetsLoading
-                                ? const Center(child: CircularProgressIndicator())
-                                : assetsState is AssetsError
-                                    ? const Center(child: Text('No assets found'))
-                                    : CustomerAssetsListWidget(assets: assets),
+                            child: Skeletonizer(
+                              enabled: assetsState is AssetsLoading,
+                              child: assetsState is AssetsError
+                                  ? const Center(child: Text('No assets found'))
+                                  : CustomerAssetsListWidget(
+                                      assets: assetsState is AssetsLoading
+                                          ? cubit.fakeAssetsForSkeletonizer
+                                          : assets,
+                                    ),
+                            ),
                           ),
                         ],
                       ),

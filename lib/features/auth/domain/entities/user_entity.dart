@@ -20,6 +20,7 @@ extension UserRoleX on UserRole {
 class UserEntity {
   final int userId;
   final String username;
+  final String fullName;
   final String email;
   final UserRole role;
   final String accessToken;
@@ -28,6 +29,7 @@ class UserEntity {
   const UserEntity({
     required this.userId,
     required this.username,
+    required this.fullName,
     required this.email,
     required this.role,
     required this.accessToken,
