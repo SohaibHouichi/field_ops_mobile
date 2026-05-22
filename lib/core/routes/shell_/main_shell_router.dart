@@ -27,9 +27,9 @@ class MainShellRouter extends StatelessWidget {
         ? authState.user.tenantInfo.name
         : 'FIELDOPS';
 
-    final username = authState is AuthAuthenticated
-        ? authState.user.username
-        : 'User';
+    final fullName = authState is AuthAuthenticated
+        ? authState.user.fullName
+        : 'sssss';
 
     final role = authState is AuthAuthenticated
         ? UserRoleX.toStringValue(authState.user.role)
@@ -70,7 +70,7 @@ class MainShellRouter extends StatelessWidget {
                       radius: 24,
                       backgroundColor: primaryBlue,
                       child: Text(
-                        username.substring(0, 3).toUpperCase(),
+                        fullName.substring(0, 3).toUpperCase(),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
@@ -115,7 +115,7 @@ class MainShellRouter extends StatelessWidget {
                             const SizedBox(width: 6),
 
                             Text(
-                              username.toUpperCase(),
+                              fullName.toUpperCase(),
                               style: const TextStyle(
                                 color: primaryBlue,
                                 fontSize: 12,

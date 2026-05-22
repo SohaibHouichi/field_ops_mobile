@@ -62,15 +62,9 @@ class AssetsScreen extends StatelessWidget {
                           CountHeader(count: assets.length, label: 'Assets'),
                           const SizedBox(height: 20),
                           Expanded(
-                            child: Skeletonizer(
-                              enabled: assetsState is AssetsLoading,
-                              child: assetsState is AssetsError
-                                  ? const Center(child: Text('No assets found'))
-                                  : CustomerAssetsListWidget(
-                                      assets: assetsState is AssetsLoading
-                                          ? cubit.fakeAssetsForSkeletonizer
-                                          : assets,
-                                    ),
+                            child: CustomerAssetsListWidget(
+                              assets: assets,
+                              isLoading: assetsState is AssetsLoading,
                             ),
                           ),
                         ],

@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-class CreateServiceRequestReqModel {
+class CreateSrParams {
   final int addressId;
   final int assetId;
   final List<MultipartFile>? attachments;
@@ -9,7 +9,7 @@ class CreateServiceRequestReqModel {
   final String title;
   final int type;
 
-  CreateServiceRequestReqModel({
+  CreateSrParams({
     required this.addressId,
     required this.assetId,
     this.attachments,
@@ -18,18 +18,4 @@ class CreateServiceRequestReqModel {
     required this.title,
     required this.type,
   });
-
-  Future<FormData> toFormData() async {
-    return FormData.fromMap({
-      'addressId': addressId,
-      'assetId': assetId,
-      'description': description,
-      'priority': priority,
-      'title': title,
-      'type': type,
-      if (attachments != null)
-        'attachments': attachments,
-    });
-  }
-  
 }

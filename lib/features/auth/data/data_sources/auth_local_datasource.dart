@@ -19,6 +19,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
     await SharedPrefHelper.setData(LocalStorageKeys.username, user.username);
     await SharedPrefHelper.setData(LocalStorageKeys.email, user.email);
     await SharedPrefHelper.setData(LocalStorageKeys.role, user.role);
+    await SharedPrefHelper.setData(LocalStorageKeys.fullName, user.fullName);
     await SharedPrefHelper.setData(
       LocalStorageKeys.tenantInfo,
       jsonEncode(user.tenantInfo.toJson()),
@@ -33,6 +34,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
     final username = await SharedPrefHelper.getString(LocalStorageKeys.username);
     final email    = await SharedPrefHelper.getString(LocalStorageKeys.email);
     final role     = await SharedPrefHelper.getString(LocalStorageKeys.role);
+    final fullName     = await SharedPrefHelper.getString(LocalStorageKeys.fullName);
     final tenantJson = await SharedPrefHelper.getString(LocalStorageKeys.tenantInfo);
 
     if (username.isEmpty || email.isEmpty || tenantJson.isEmpty) return null;
@@ -42,6 +44,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
       'username': username,
       'email': email,
       'role': role,
+      'fullName' : fullName,
       'accessToken': token,
       'tenantInfo': jsonDecode(tenantJson),
     });
@@ -54,6 +57,7 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
     await SharedPrefHelper.removeData(LocalStorageKeys.username);
     await SharedPrefHelper.removeData(LocalStorageKeys.email);
     await SharedPrefHelper.removeData(LocalStorageKeys.role);
+    await SharedPrefHelper.removeData(LocalStorageKeys.fullName);
     await SharedPrefHelper.removeData(LocalStorageKeys.tenantInfo);
   }
 }

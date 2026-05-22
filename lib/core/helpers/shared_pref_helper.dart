@@ -121,6 +121,7 @@ class SharedPrefHelper {
 class LocalStorageKeys {
   static const String userId = "userId";
   static const String username = "username";
+  static const String fullName = "fullName";
   static const String email = "email";
   static const String role = "role";
   static const String tenantInfo = "tenantInfo";
