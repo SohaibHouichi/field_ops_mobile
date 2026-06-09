@@ -6,6 +6,7 @@ import 'package:field_ops/core/di/shell_injection.dart';
 import 'package:field_ops/core/helpers/dio_generate.dart';
 import 'package:field_ops/features/customer/customer_injection.dart';
 import 'package:field_ops/features/service_request/sr_injection.dart';
+import 'package:field_ops/features/tenants/tenant_injection.dart';
 import 'package:get_it/get_it.dart';
 
 class DiContainer {
@@ -22,5 +23,6 @@ class DiContainer {
     setupHome(getIt);
     setupAssets(getIt);
     setupSr(getIt);
+    setupTenant(getIt);
   }
 }

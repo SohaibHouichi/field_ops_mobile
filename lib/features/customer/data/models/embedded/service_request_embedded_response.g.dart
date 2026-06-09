@@ -35,7 +35,7 @@ ServiceRequestEmbeddedResponse _$ServiceRequestEmbeddedResponseFromJson(
   technicianName: json['technicianName'] as String?,
   teamId: (json['teamId'] as num?)?.toInt(),
   teamName: json['teamName'] as String?,
-  addressId: json['addressId'] as String?,
+  addressId: (json['addressId'] as num?)?.toInt(),
   addressLabel: json['addressLabel'] as String?,
   assetId: (json['assetId'] as num?)?.toInt(),
   assetName: json['assetName'] as String?,

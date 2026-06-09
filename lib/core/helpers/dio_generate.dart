@@ -9,9 +9,12 @@ import '../helpers/shared_pref_helper.dart';
 class AuthInterceptor extends Interceptor {
   @override
   Future<void> onRequest(
-      RequestOptions options, RequestInterceptorHandler handler) async {
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
     String? token =
-        await SharedPrefHelper.getSecuredString(LocalStorageKeys.accessToken);
+        // await SharedPrefHelper.getSecuredString(LocalStorageKeys.accessToken);
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzMiIsImVtYWlsIjoiZW1wOTFAbG9jYWwuY29tIiwicm9sZSI6WyJFbXBsb3llZSIsIkVtcGxveWVlIl0sIlRlbmFudElkIjoiMTExMTExMTEtMjIyMi0zMzMzLTQ0NDQtNTU1NTU1NTU1NTU1IiwibmJmIjoxNzgwOTU1MDgyLCJleHAiOjE5MDA5NTUwODIsImlhdCI6MTc4MDk1NTA4MiwiaXNzIjoibG9jYWxob3N0IiwiYXVkIjoibG9jYWxob3N0In0.cTbJMJvwzpd4iII8c7LNcTT1JWc-sIsyTnouw1kZXyU";
     if (token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';
     }
@@ -29,9 +32,7 @@ class DioGenerate {
   static Dio getDio() {
     const Duration timeout = Duration(seconds: 600); // Use const
     if (_dio == null) {
-      _dio = Dio(
-        BaseOptions(baseUrl: "http://fieldopsapi.runasp.net/api" )
-      );
+      _dio = Dio(BaseOptions(baseUrl: "http://fieldopsapi.runasp.net/api"));
       _dio!
         ..options.connectTimeout = timeout
         ..options.receiveTimeout = timeout;
@@ -45,7 +46,7 @@ class DioGenerate {
       }
 
       _setStaticHeaders(); // Sets non-dynamic headers
-     _addDioInterceptors(); // Adds all interceptors including AuthInterceptor
+      _addDioInterceptors(); // Adds all interceptors including AuthInterceptor
     }
     return _dio!;
   }
@@ -72,13 +73,16 @@ class DioGenerate {
 
   // Renamed and modified to include AuthInterceptor
   static void _addDioInterceptors() {
-     _dio!.interceptors
-         .add(AuthInterceptor()); // Add our custom auth interceptor
-    _dio!.interceptors.add(PrettyDioLogger(
-      requestHeader: true,
-      requestBody: true,
-      responseBody: true,
-      error: true, // Good to log errors as well
-    ));
+    _dio!.interceptors.add(
+      AuthInterceptor(),
+    ); // Add our custom auth interceptor
+    _dio!.interceptors.add(
+      PrettyDioLogger(
+        requestHeader: true,
+        requestBody: true,
+        responseBody: true,
+        error: true, // Good to log errors as well
+      ),
+    );
   }
 }
