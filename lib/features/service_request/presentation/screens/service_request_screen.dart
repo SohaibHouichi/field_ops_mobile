@@ -18,15 +18,20 @@ class ServiceRequestScreen extends StatelessWidget {
     final cubit = context.read<ServiceRequestCubit>();
 
     return BlocConsumer<CustomerCubit, CustomerState>(
+      // ✅ Fires on state transitions after widget is mounted
       listener: (context, state) {
         if (state is CustomerSuccess) {
-          cubit.getByCustomerId(state.customer.id);
+          cubit.lastLoadedCustomerId = state.customer.id;
+          cubit.setRequests(state.customer.serviceRequestsList);
         }
       },
       builder: (context, customerState) {
-        if (customerState is CustomerSuccess) {
+        // ✅ Catches already-emitted CustomerSuccess on first build
+        // Guard: only runs when requests haven't been loaded yet
+        if (customerState is CustomerSuccess && cubit.allRequests == null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            cubit.getByCustomerId(customerState.customer.id);
+            cubit.lastLoadedCustomerId = customerState.customer.id;
+            cubit.setRequests(customerState.customer.serviceRequestsList);
           });
         }
 
@@ -39,6 +44,8 @@ class ServiceRequestScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+
+              // ── Search ─────────────────────────────────────────
               SearchBarWidget(
                 label: 'Search service requests',
                 controller: cubit.searchController,

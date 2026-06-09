@@ -3,6 +3,7 @@ import 'package:field_ops/core/enums/sr_type_enum.dart';
 import 'package:field_ops/core/enums/status_enums.dart';
 import 'package:field_ops/core/helpers/shared_pref_helper.dart';
 import 'package:field_ops/features/assets/domain/entities/assets_entity.dart';
+import 'package:field_ops/features/customer/domain/entities/embedded/service_request_embedded_entity.dart';
 import 'package:field_ops/features/service_request/domain/entities/service_request_entity.dart';
 import 'package:field_ops/features/service_request/domain/usecases/create_sr_usecase.dart';
 import 'package:field_ops/features/service_request/domain/usecases/delete_sr_usecase.dart';
@@ -66,6 +67,22 @@ class ServiceRequestCubit extends Cubit<ServiceRequestState> {
   // ── Last loaded customer ──────────────────────────────────────────
   int? lastLoadedCustomerId;
 
+  // ── Fake requests for skeletonizer ────────────────────────────────
+  List<ServiceRequestEntity> fakeRequestsForSkeletonizer = List.generate(
+    6,
+    (index) => ServiceRequestEntity(
+      id: 0,
+      title: 'xxxxxxxxxxxx',
+      reference: 'xxxxxx',
+      status: 1,
+      type: 1,
+      customerPriority: 1,
+      employeePriority: 0,
+      customerId: 0,
+      attachments: [],
+    ),
+  );
+
   // ── Open SR sheet (create / edit) ─────────────────────────────────
   void openServiceRequestSheet(
     BuildContext context,
@@ -107,24 +124,34 @@ class ServiceRequestCubit extends Cubit<ServiceRequestState> {
     });
   }
 
-  // ── Get by customer id ────────────────────────────────────────────
-  Future<void> getByCustomerId(int customerId) async {
-    lastLoadedCustomerId = customerId;
-    emit(ServiceRequestLoading());
-    try {
-      final result = await _getSrByCustomerId(customerId);
-      _allRequests = result;
-      _applySearchAndFilters();
-    } catch (e) {
-      emit(ServiceRequestFailure(e.toString()));
-    }
+  // ── Set requests (called from screen when customer loads) ─────────
+  // Mirrors AssetsCubit.setAssets — uses embedded data from CustomerEntity,
+  // no API call needed on initial load.
+  void setRequests(List<ServiceRequestEmbeddedEntity> requests) {
+    _allRequests = requests
+        .map(
+          (e) => ServiceRequestEntity(
+            id: e.id,
+            title: e.title,
+            reference: e.reference,
+            type: e.type,
+            status: e.status,
+            customerPriority: e.customerPriority,
+            employeePriority: e.employeePriority,
+            customerId: 1,
+            attachments: [],
+            // ... all fields mapped
+          ),
+        )
+        .toList();
+    _applySearchAndFilters();
   }
 
-  // ── Refresh ───────────────────────────────────────────────────────
-  Future<void> refresh() async {
+  // ── Refresh (re-fetches from API after create/update/delete) ──────
+  Future<void> refreshRequests() async {
+    if (lastLoadedCustomerId == null) return;
     try {
-      final custId = await _getCustomerId();
-      final result = await _getSrByCustomerId(custId);
+      final result = await _getSrByCustomerId(lastLoadedCustomerId!);
       _allRequests = result;
       _applySearchAndFilters();
     } catch (e) {
@@ -138,7 +165,7 @@ class ServiceRequestCubit extends Cubit<ServiceRequestState> {
     try {
       await _createSr(params);
       emit(ServiceRequestCreated());
-      await refresh();
+      await refreshRequests();
     } catch (e) {
       emit(ServiceRequestFailure(e.toString()));
     }
@@ -150,7 +177,7 @@ class ServiceRequestCubit extends Cubit<ServiceRequestState> {
     try {
       await _updateSr(id, params);
       emit(ServiceRequestUpdated());
-      await refresh();
+      await refreshRequests();
     } catch (e) {
       emit(ServiceRequestFailure(e.toString()));
     }
@@ -162,13 +189,13 @@ class ServiceRequestCubit extends Cubit<ServiceRequestState> {
     try {
       await _deleteSr(id);
       emit(ServiceRequestDeleted());
-      await refresh();
+      await refreshRequests();
     } catch (e) {
       emit(ServiceRequestFailure(e.toString()));
     }
   }
 
-  // ── Search (local, no loading flicker) ───────────────────────────
+  // ── Search (local, no loading flicker) ────────────────────────────
   void search(String query) {
     _currentQuery = query;
     _applySearchAndFilters();
@@ -198,7 +225,7 @@ class ServiceRequestCubit extends Cubit<ServiceRequestState> {
     formKey.currentState?.reset();
   }
 
-  // ── Internal: apply search + filters then emit ────────────────────
+  // ── Internal: apply search + status filter then emit ──────────────
   void _applySearchAndFilters() {
     if (_allRequests == null) return;
 
@@ -215,15 +242,6 @@ class ServiceRequestCubit extends Cubit<ServiceRequestState> {
           )
           .toList();
     }
-
-    _emitFiltered(override: list);
-  }
-
-  // ── Internal: apply status filter then emit ───────────────────────
-  void _emitFiltered({List<ServiceRequestEntity>? override}) {
-    if (_allRequests == null) return;
-
-    var list = override ?? _allRequests!;
 
     if (selectedStatus != null) {
       list = list.where((e) => e.status == selectedStatus!.index + 1).toList();

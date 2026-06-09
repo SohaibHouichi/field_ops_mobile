@@ -60,7 +60,7 @@ class ServiceRequestRemoteDatasourceImpl
     final res = await dioClient.get(
       '/v1/service-requests?filter[customerId].Value=$id',
     );
-    return (res.data['items'] as List)
+    return (res.data["items"] as List)
         .map(
           (e) =>
               ServiceRequestResponseModel.fromJson(e as Map<String, dynamic>),
@@ -75,7 +75,7 @@ class ServiceRequestRemoteDatasourceImpl
     final res = await dioClient.get(
       '/v1/service-requests?search[title]=$query',
     );
-    return (res.data['itmes'] as List)
+    return (res.data["items"] as List)
         .map(
           (e) =>
               ServiceRequestResponseModel.fromJson(e as Map<String, dynamic>),

@@ -2,7 +2,6 @@ import 'package:field_ops/core/constants/app_color.dart';
 import 'package:field_ops/core/enums/customer_priority_enum.dart';
 import 'package:field_ops/core/enums/sr_type_enum.dart';
 import 'package:field_ops/features/assets/domain/entities/assets_entity.dart';
-//import 'package:field_ops/features/assets/presentation/cubit/assets_cubit.dart';
 import 'package:field_ops/features/service_request/domain/entities/service_request_entity.dart';
 import 'package:field_ops/features/service_request/domain/usecases/params/create_sr_params.dart';
 import 'package:field_ops/features/service_request/domain/usecases/params/update_sr_params.dart';
@@ -37,8 +36,8 @@ class AddServiceRequestSheet extends StatelessWidget {
         : descriptionController.text.trim();
     final priority = cubit.priorityNotifier.value.value;
     final type = cubit.typeNotifier.value.value;
-    final assetId = cubit.assetNotifier.value?.id ?? 0;
-    final addressId = cubit.selectedAddressId ?? 0;
+    final assetId = cubit.assetNotifier.value?.id ?? 1;
+    final addressId = cubit.selectedAddressId ??1;
 
     if (_isEdit) {
       cubit.updateServiceRequest(
@@ -69,7 +68,6 @@ class AddServiceRequestSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<ServiceRequestCubit>();
-   
 
     // Resolve asset notifier once in edit mode
     if (_isEdit &&
@@ -145,11 +143,42 @@ class AddServiceRequestSheet extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
 
-                // ── Title ─────────────────────────────────────────
-                _Field(
-                  controller: titleController,
-                  label: 'Title',
-                  icon: Icons.title_outlined,
+                // ── Type ──────────────────────────────────────────
+                ValueListenableBuilder<ServiceRequestType>(
+                  valueListenable: cubit.typeNotifier,
+                  builder: (_, type, __) => Column(
+                    children: [
+                      _SrDropdown<ServiceRequestType>(
+                        label: 'Type',
+                        icon: Icons.category_outlined,
+                        value: type,
+                        items: ServiceRequestType.values
+                            .where((t) => t != ServiceRequestType.unknown)
+                            .toList(),
+                        itemLabel: (t) =>
+                            t.name[0].toUpperCase() + t.name.substring(1),
+                        onChanged: (v) {
+                          if (v != null) {
+                            // Clear title when switching away from "other"
+                            if (v != ServiceRequestType.other) {
+                              titleController.clear();
+                            }
+                            cubit.typeNotifier.value = v;
+                          }
+                        },
+                      ),
+
+                      // ── Title — only visible when type is "other" ─
+                      if (type == ServiceRequestType.other) ...[
+                        const SizedBox(height: 12),
+                        _Field(
+                          controller: titleController,
+                          label: 'Title',
+                          icon: Icons.title_outlined,
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 12),
 
@@ -160,25 +189,6 @@ class AddServiceRequestSheet extends StatelessWidget {
                   icon: Icons.notes_outlined,
                   maxLines: 3,
                   required: false,
-                ),
-                const SizedBox(height: 12),
-
-                // ── Type ──────────────────────────────────────────
-                ValueListenableBuilder<ServiceRequestType>(
-                  valueListenable: cubit.typeNotifier,
-                  builder: (_, type, __) => _SrDropdown<ServiceRequestType>(
-                    label: 'Type',
-                    icon: Icons.category_outlined,
-                    value: type,
-                    items: ServiceRequestType.values
-                        .where((t) => t != ServiceRequestType.unknown)
-                        .toList(),
-                    itemLabel: (t) =>
-                        t.name[0].toUpperCase() + t.name.substring(1),
-                    onChanged: (v) {
-                      if (v != null) cubit.typeNotifier.value = v;
-                    },
-                  ),
                 ),
                 const SizedBox(height: 12),
 

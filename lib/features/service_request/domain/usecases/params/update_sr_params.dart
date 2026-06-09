@@ -7,7 +7,7 @@ class UpdateSrParams {
   final String? description;
   final int priority;
   final String title;
-  final int type;
+  final int? type;
 
   UpdateSrParams({
     required this.addressId,
@@ -16,6 +16,6 @@ class UpdateSrParams {
     this.description,
     required this.priority,
     required this.title,
-    required this.type,
+     this.type,
   });
 }

@@ -7,7 +7,7 @@ class CreateServiceRequestReqModel {
   final String? description;
   final int priority;
   final String title;
-  final int type;
+  final int? type; // ← nullable: omitted from FormData when null
 
   CreateServiceRequestReqModel({
     required this.addressId,
@@ -16,20 +16,18 @@ class CreateServiceRequestReqModel {
     this.description,
     required this.priority,
     required this.title,
-    required this.type,
+    this.type,
   });
 
   Future<FormData> toFormData() async {
     return FormData.fromMap({
-      'addressId': addressId,
-      'assetId': assetId,
-      'description': description,
-      'priority': priority,
-      'title': title,
-      'type': type,
-      if (attachments != null)
-        'attachments': attachments,
+      'AddressId': addressId,
+      'AssetId': assetId,
+      if (description != null) 'description': description,
+      'Priority': priority,
+      'Title': title,
+      if (type != null) 'Type': type,         // ← only sent when not "other"
+      if (attachments != null) 'Attachments': attachments,
     });
   }
-  
 }

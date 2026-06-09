@@ -8,7 +8,9 @@ import 'package:field_ops/features/customer/presentation/screens/customer_dashbo
 import 'package:field_ops/features/customer/presentation/screens/customer_profile_screen.dart';
 import 'package:field_ops/features/service_request/presentation/cubit/service_request_cubit.dart';
 import 'package:field_ops/features/service_request/presentation/screens/service_request_screen.dart';
+import 'package:field_ops/features/technician/presentation/cubit/technician_cubit.dart';
 import 'package:field_ops/features/technician/presentation/screens/technician_dashboard_screen.dart';
+import 'package:field_ops/features/technician/presentation/screens/technician_profile.dart';
 import 'package:field_ops/layers/business_logic/cubit/Home/home_cubit.dart';
 import 'package:field_ops/features/auth/presentation/screens/login_screen.dart';
 import 'package:field_ops/features/auth/presentation/screens/password_restoring_screen.dart';
@@ -29,6 +31,8 @@ GoRouter _buildRouter() {
   final assetsCubit = DiContainer.getIt<AssetsCubit>();
   final srCubit = DiContainer.getIt<ServiceRequestCubit>();
 
+  final tech = DiContainer.getIt<TechnicianCubit>();
+
   return GoRouter(
     debugLogDiagnostics: true,
     initialLocation: loginPagePath,
@@ -40,7 +44,8 @@ GoRouter _buildRouter() {
 
       if (authState is AuthInitial || authState is AuthLoading) return null;
 
-      final isPublic = location == loginPagePath ||
+      final isPublic =
+          location == loginPagePath ||
           location == passwordRestorePath ||
           location == signUpPagePath;
 
@@ -93,10 +98,10 @@ GoRouter _buildRouter() {
       // ── Customer shell ────────────────────────────────────────────
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) => MultiBlocProvider(
-          providers:[ 
+          providers: [
             BlocProvider.value(value: customerCubit),
             BlocProvider.value(value: assetsCubit),
-            BlocProvider.value(value: srCubit)
+            BlocProvider.value(value: srCubit),
           ],
           child: MainShellRouter(navigationShell: navigationShell),
         ),
@@ -104,7 +109,7 @@ GoRouter _buildRouter() {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: customerHomePagePath,      // e.g. '/customer/home'
+                path: customerHomePagePath, // e.g. '/customer/home'
                 name: customerHomePageName,
                 builder: (context, state) => const CustomerDashboard(),
               ),
@@ -113,28 +118,27 @@ GoRouter _buildRouter() {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: customerRequestsPagePath,  // e.g. '/customer/requests'
+                path: customerRequestsPagePath, // e.g. '/customer/requests'
                 name: customerRequestsPageName,
-                builder: (context, state) =>  ServiceRequestScreen(),
+                builder: (context, state) => ServiceRequestScreen(),
               ),
             ],
           ),
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: customerAssetsPagePath,    // e.g. '/customer/assets'
+                path: customerAssetsPagePath, // e.g. '/customer/assets'
                 name: customerAssetsPageName,
                 builder: (context, state) => AssetsScreen(),
-                  
               ),
             ],
           ),
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: customerProfilePagePath,  // e.g. '/customer/profile'
+                path: customerProfilePagePath, // e.g. '/customer/profile'
                 name: customerProfilePageName,
-                builder: (context, state) =>  CustomerProfileScreen(),
+                builder: (context, state) => CustomerProfileScreen(),
               ),
             ],
           ),
@@ -143,14 +147,18 @@ GoRouter _buildRouter() {
 
       // ── Technician shell ──────────────────────────────────────────
       StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) => MainShellRouter(
-          navigationShell: navigationShell,
+        builder: (context, state, navigationShell) => MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: tech),
+          
+          ],
+          child: MainShellRouter(navigationShell: navigationShell),
         ),
         branches: [
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: technicianHomePagePath,    // e.g. '/technician/home'
+                path: technicianHomePagePath, // e.g. '/technician/home'
                 name: technicianHomePageName,
                 builder: (context, state) => BlocProvider(
                   create: (_) => DiContainer.getIt<HomeCubit>(),
@@ -162,7 +170,7 @@ GoRouter _buildRouter() {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: taskPagePath,              // e.g. '/technician/tasks'
+                path: taskPagePath, // e.g. '/technician/tasks'
                 name: taskPageName,
                 builder: (context, state) => const ServiceRequest(),
                 routes: [
@@ -178,18 +186,18 @@ GoRouter _buildRouter() {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: schedulePagePath,          // e.g. '/technician/schedule'
+                path: schedulePagePath, // e.g. '/technician/schedule'
                 name: schedulePageName,
-                builder: (context, state) => const ScheduleScreen(),
+                builder: (context, state) => const AttachmentsPage(),
               ),
             ],
           ),
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: profilePagePath, // e.g. '/technician/profile'
+                path: profilePagePath,
                 name: profilePageName,
-                builder: (context, state) => const ProfileScreen(),
+                builder: (context, state) => const TechnicianProfile(),
               ),
             ],
           ),
@@ -198,6 +206,7 @@ GoRouter _buildRouter() {
     ],
   );
 }
+
 final GoRouter appRouter = _buildRouter();
 
 class _AuthStateListenable extends ChangeNotifier {

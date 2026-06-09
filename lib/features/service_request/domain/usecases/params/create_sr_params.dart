@@ -7,7 +7,7 @@ class CreateSrParams {
   final String? description;
   final int priority;
   final String title;
-  final int type;
+  final int? type; // ← nullable: null when type is "other", not sent to API
 
   CreateSrParams({
     required this.addressId,
@@ -16,6 +16,6 @@ class CreateSrParams {
     this.description,
     required this.priority,
     required this.title,
-    required this.type,
+    this.type, // ← optional
   });
 }
