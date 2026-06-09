@@ -13,6 +13,7 @@ Map<String, ShellRequirementModel> shellConfigRoute = {
     title: '',
     showBottomNavigationBar: true,
     showFloatingButton: true,
+    isRequestTap: true
   ),
 
   //  customerRequestsDetailName: ShellRequirementModel(

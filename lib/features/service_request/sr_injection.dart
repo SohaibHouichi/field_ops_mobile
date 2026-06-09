@@ -40,7 +40,7 @@ void setupSr(GetIt getIt) {
       createSr: getIt<CreateSrUsecase>(),
       deleteSr: getIt<DeleteSrUsecase>(),
       getSrByCustomerId: getIt<GetSrByCustomerIdUsecase>(),
-      searchSr: getIt<SearchSrUsecase>(),
+   //   searchSr: getIt<SearchSrUsecase>(),
       updateSr: getIt<UpdateSrUsecase>(),
     ),
   );

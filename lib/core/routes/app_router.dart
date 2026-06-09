@@ -6,7 +6,8 @@ import 'package:field_ops/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:field_ops/features/customer/presentation/cubit/customer_cubit.dart';
 import 'package:field_ops/features/customer/presentation/screens/customer_dashboard_screen.dart';
 import 'package:field_ops/features/customer/presentation/screens/customer_profile_screen.dart';
-import 'package:field_ops/features/customer/presentation/screens/customer_service_requests_screen.dart';
+import 'package:field_ops/features/service_request/presentation/cubit/service_request_cubit.dart';
+import 'package:field_ops/features/service_request/presentation/screens/service_request_screen.dart';
 import 'package:field_ops/features/technician/presentation/screens/technician_dashboard_screen.dart';
 import 'package:field_ops/layers/business_logic/cubit/Home/home_cubit.dart';
 import 'package:field_ops/features/auth/presentation/screens/login_screen.dart';
@@ -26,6 +27,7 @@ GoRouter _buildRouter() {
   final authCubit = DiContainer.getIt<AuthCubit>();
   final customerCubit = DiContainer.getIt<CustomerCubit>();
   final assetsCubit = DiContainer.getIt<AssetsCubit>();
+  final srCubit = DiContainer.getIt<ServiceRequestCubit>();
 
   return GoRouter(
     debugLogDiagnostics: true,
@@ -93,7 +95,8 @@ GoRouter _buildRouter() {
         builder: (context, state, navigationShell) => MultiBlocProvider(
           providers:[ 
             BlocProvider.value(value: customerCubit),
-            BlocProvider.value(value: assetsCubit)
+            BlocProvider.value(value: assetsCubit),
+            BlocProvider.value(value: srCubit)
           ],
           child: MainShellRouter(navigationShell: navigationShell),
         ),
@@ -112,7 +115,7 @@ GoRouter _buildRouter() {
               GoRoute(
                 path: customerRequestsPagePath,  // e.g. '/customer/requests'
                 name: customerRequestsPageName,
-                builder: (context, state) =>  CustomerServiceRequests(),
+                builder: (context, state) =>  ServiceRequestScreen(),
               ),
             ],
           ),

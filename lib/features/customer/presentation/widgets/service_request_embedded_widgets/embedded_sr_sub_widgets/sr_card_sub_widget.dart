@@ -12,10 +12,8 @@ class ServiceRequestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final status = ServiceRequestStatus.values.elementAtOrNull(sr.status)
-        ?? ServiceRequestStatus.unknown;
-    final type = ServiceRequestType.values.elementAtOrNull(sr.type)
-        ?? ServiceRequestType.unknown;
+    final status = ServiceRequestStatus.fromInt(sr.status);
+    final type = ServiceRequestType.fromInt(sr.type);
 
     return Container(
       decoration: BoxDecoration(

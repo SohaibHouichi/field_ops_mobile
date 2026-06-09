@@ -42,24 +42,26 @@ class AssetsCubit extends Cubit<AssetsState> {
   // ── Assets cache ──────────────────────────────────────────────────
   List<AssetEntity>? _allAssets;
   List<AssetEntity>? get allAssets => _allAssets;
- List<AssetEntity> fakeAssetsForSkeletonizer = List.generate(
-  6,
-  (index) => AssetEntity(
-    // every required field filled with a harmless placeholder:
-    id: 0,
-    name: 'xxxxxxxxxxxx',
-    // number fields  -> 0
-    // string fields  -> 'xxxxx'  (give some length so the skeleton bar has width)
-    // bool fields    -> false
-    // date fields    -> DateTime.now()
-    // nested objects -> a fake instance of that object too
-  ),
-);
+
+  // ── Active query ──────────────────────────────────────────────────
+  // Tracks the current search string so clearSearch() and setAssets()
+  // don't need to re-derive it from the controller.
+  String _currentQuery = '';
+
+  // ── Last loaded customer ──────────────────────────────────────────
+  // Prevents re-setting assets when the same customer is already loaded,
+  // while still reloading if the customer actually changes.
+  int? lastLoadedCustomerId;
+
+  List<AssetEntity> fakeAssetsForSkeletonizer = List.generate(
+    6,
+    (index) => AssetEntity(
+      id: 0,
+      name: 'xxxxxxxxxxxx',
+    ),
+  );
 
   // ── Open asset sheet (create / edit) ──────────────────────────────
-  /// Opens the asset bottom sheet.
-  /// - If [asset] is null  -> CREATE mode (empty form)
-  /// - If [asset] is given -> EDIT mode (pre-filled form)
   void openAssetSheet(BuildContext context, {AssetEntity? asset}) {
     final isEdit = asset != null;
 
@@ -123,7 +125,7 @@ class AssetsCubit extends Cubit<AssetsState> {
     }
   }
 
-  // ── edit asset ─────────────────────────────────────────────────────
+  // ── Edit asset ────────────────────────────────────────────────────
   Future<void> editAssets({
     required int id,
     required String name,
@@ -146,7 +148,6 @@ class AssetsCubit extends Cubit<AssetsState> {
           customerId: custId,
         ),
       );
-
       emit(EditAssetsSuccessfuly());
       await refreshAssets();
     } catch (e) {
@@ -154,9 +155,9 @@ class AssetsCubit extends Cubit<AssetsState> {
     }
   }
 
-  // ── delete asset ─────────────────────────────────────────────────────
+  // ── Delete asset ──────────────────────────────────────────────────
   Future<void> deleteAssets(int id) async {
-    emit(AssetsLoading());
+    emit(const AssetsLoading());
     try {
       await _deleteAssetsUsecase(id);
       emit(DeleteAssetsSuccessfuly());
@@ -166,52 +167,64 @@ class AssetsCubit extends Cubit<AssetsState> {
     }
   }
 
-  // ── Refresh assets ──────────────────────────────
+  // ── Refresh assets ────────────────────────────────────────────────
   Future<void> refreshAssets() async {
     try {
       final custId = await getCustomerId();
       final assets = await _assetsByCustomerIdUseCase(custId);
-      setAssets(assets);
+      _allAssets = assets;
+      _applySearch();
     } catch (e) {
       emit(AssetsError(e.toString()));
     }
   }
 
-  // ── Set assets ────────────────────────────────────────────────────
+  // ── Set assets (called from screen when customer loads) ───────────
   void setAssets(List<AssetEntity> assets) {
     _allAssets = assets;
-    emit(AssetsSearchSuccess(assets));
+    _applySearch();
   }
 
   // ── Search ────────────────────────────────────────────────────────
-  Future<void> search(String query) async {
-    if (query.isEmpty) {
-      if (_allAssets != null) emit(AssetsSearchSuccess(_allAssets!));
-      return;
-    }
-    if (_allAssets == null) return;
-    emit(const AssetsLoading());
-    try {
-      final allResults = await _searchAssetsUsecase(query);
-      final result = allResults.where(
-        (s) => _allAssets!.any((e) => e.id == s.id),
-      );
-      emit(AssetsSearchSuccess(result.toList()));
-    } catch (e) {
-      emit(AssetsError(e.toString()));
-    }
+  // Filters locally — no loading emit, no API call, no flicker.
+  void search(String query) {
+    _currentQuery = query;
+    _applySearch();
   }
-  // ── get customer id ──────────────────────────────────────────────────
-  Future<int> getCustomerId () async{
-    final id  = await SharedPrefHelper.getInt(LocalStorageKeys.userId);
-    return id.toInt();
-  }
-
 
   // ── Clear search ──────────────────────────────────────────────────
+  // Sets _currentQuery first so the onChanged fired by controller.clear()
+  // finds an empty query and doesn't double-trigger.
   void clearSearch() {
+    _currentQuery = '';
     searchController.clear();
-    if (_allAssets != null) emit(AssetsSearchSuccess(_allAssets!));
+    _applySearch();
+  }
+
+  // ── Internal: apply search and emit ──────────────────────────────
+  void _applySearch() {
+    if (_allAssets == null) return;
+
+    if (_currentQuery.isEmpty) {
+      emit(AssetsSearchSuccess(_allAssets!));
+      return;
+    }
+
+    final q = _currentQuery.toLowerCase();
+    final result = _allAssets!.where((e) =>
+      e.name.toLowerCase().contains(q) ||
+      (e.brand?.toLowerCase().contains(q) ?? false) ||
+      (e.model?.toLowerCase().contains(q) ?? false) ||
+      (e.serialNumber?.toLowerCase().contains(q) ?? false),
+    ).toList();
+
+    emit(AssetsSearchSuccess(result));
+  }
+
+  // ── Get customer id ───────────────────────────────────────────────
+  Future<int> getCustomerId() async {
+    final id = await SharedPrefHelper.getInt(LocalStorageKeys.userId);
+    return id.toInt();
   }
 
   // ── Clear form ────────────────────────────────────────────────────

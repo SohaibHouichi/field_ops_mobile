@@ -7,6 +7,7 @@ import 'package:field_ops/core/widgets/show_tenant_info_bottom_sheet.dart';
 import 'package:field_ops/features/assets/presentation/cubit/assets_cubit.dart';
 import 'package:field_ops/features/auth/domain/entities/user_entity.dart';
 import 'package:field_ops/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:field_ops/features/service_request/presentation/cubit/service_request_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -48,7 +49,13 @@ class MainShellRouter extends StatelessWidget {
               backgroundColor: primaryBlue,
               child: const Icon(Icons.add, color: Colors.white),
             )
-          : null,
+          :config.showFloatingButton && config.isRequestTap ? FloatingActionButton(
+              onPressed: () {
+               context.read<ServiceRequestCubit>().openServiceRequestSheet(context , context.read<AssetsCubit>().allAssets);
+              },
+              backgroundColor: primaryBlue,
+              child: const Icon(Icons.add, color: Colors.white),
+            ) : null ,
       backgroundColor: bgColor,
 
       // ───────────────── APPBAR ─────────────────

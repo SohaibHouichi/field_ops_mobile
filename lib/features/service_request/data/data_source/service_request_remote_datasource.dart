@@ -23,7 +23,7 @@ class ServiceRequestRemoteDatasourceImpl
     CreateServiceRequestReqModel requestData,
   ) async {
     final res = await dioClient.post(
-      '/v1/service-request/customer',
+      '/v1/service-requests/customer',
       data: requestData.toFormData(),
     );
     return ServiceRequestResponseModel.fromJson(res.data);

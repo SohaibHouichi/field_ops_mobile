@@ -6,7 +6,6 @@ import 'package:field_ops/features/customer/presentation/cubit/customer_cubit.da
 import 'package:field_ops/features/customer/presentation/widgets/assets_embedded_widgets/customer_assets_list_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 
 class AssetsScreen extends StatelessWidget {
   const AssetsScreen({super.key});
