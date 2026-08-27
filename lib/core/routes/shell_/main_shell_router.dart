@@ -30,7 +30,7 @@ class MainShellRouter extends StatelessWidget {
 
     final fullName = authState is AuthAuthenticated
         ? authState.user.fullName
-        : 'sssss';
+        : 'FIELDOPS';
 
     final role = authState is AuthAuthenticated
         ? UserRoleX.toStringValue(authState.user.role)
@@ -50,8 +50,8 @@ class MainShellRouter extends StatelessWidget {
               child: const Icon(Icons.add, color: Colors.white),
             )
           :config.showFloatingButton && config.isRequestTap ? FloatingActionButton(
-              onPressed: () {
-               context.read<ServiceRequestCubit>().openServiceRequestSheet(context , context.read<AssetsCubit>().allAssets);
+              onPressed: () async {
+               context.read<ServiceRequestCubit>().openServiceRequestSheet(context , await context.read<AssetsCubit>().allAssetsFuture);
               },
               backgroundColor: primaryBlue,
               child: const Icon(Icons.add, color: Colors.white),

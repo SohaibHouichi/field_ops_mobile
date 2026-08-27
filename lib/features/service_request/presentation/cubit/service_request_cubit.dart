@@ -2,6 +2,7 @@ import 'package:field_ops/core/enums/customer_priority_enum.dart';
 import 'package:field_ops/core/enums/sr_type_enum.dart';
 import 'package:field_ops/core/enums/status_enums.dart';
 import 'package:field_ops/core/helpers/shared_pref_helper.dart';
+import 'package:field_ops/core/usecases/local_storage_usecase.dart';
 import 'package:field_ops/features/assets/domain/entities/assets_entity.dart';
 import 'package:field_ops/features/customer/domain/entities/embedded/service_request_embedded_entity.dart';
 import 'package:field_ops/features/service_request/domain/entities/service_request_entity.dart';
@@ -22,16 +23,19 @@ class ServiceRequestCubit extends Cubit<ServiceRequestState> {
   final DeleteSrUsecase _deleteSr;
   final GetSrByCustomerIdUsecase _getSrByCustomerId;
   final UpdateSrUsecase _updateSr;
+  final GetCustomerIdUsecase _getCustomerIdUsecase;
 
   ServiceRequestCubit({
     required CreateSrUsecase createSr,
     required DeleteSrUsecase deleteSr,
     required GetSrByCustomerIdUsecase getSrByCustomerId,
     required UpdateSrUsecase updateSr,
+    required GetCustomerIdUsecase getCustomerId,
   }) : _createSr = createSr,
        _deleteSr = deleteSr,
        _getSrByCustomerId = getSrByCustomerId,
        _updateSr = updateSr,
+       _getCustomerIdUsecase = getCustomerId,
        super(ServiceRequestInitial());
 
   // ── Search controller ─────────────────────────────────────────────
@@ -64,9 +68,6 @@ class ServiceRequestCubit extends Cubit<ServiceRequestState> {
   // ── Active query ──────────────────────────────────────────────────
   String _currentQuery = '';
 
-  // ── Last loaded customer ──────────────────────────────────────────
-  int? lastLoadedCustomerId;
-
   // ── Fake requests for skeletonizer ────────────────────────────────
   List<ServiceRequestEntity> fakeRequestsForSkeletonizer = List.generate(
     6,
@@ -96,9 +97,7 @@ class ServiceRequestCubit extends Cubit<ServiceRequestState> {
     } else {
       titleController.text = sr.title;
       descriptionController.text = sr.description ?? '';
-      selectedAddressId = sr.addressId != null
-          ? int.tryParse(sr.addressId!)
-          : null;
+      selectedAddressId = sr.addressId != 0 ? sr.addressId! : null;
       priorityNotifier.value = CustomerPriority.fromInt(sr.customerPriority);
       typeNotifier.value = ServiceRequestType.fromInt(sr.type);
       // assetNotifier resolved inside sheet once assets are available
@@ -140,56 +139,65 @@ class ServiceRequestCubit extends Cubit<ServiceRequestState> {
             employeePriority: e.employeePriority,
             customerId: 1,
             attachments: [],
-            // ... all fields mapped
           ),
         )
         .toList();
     _applySearchAndFilters();
   }
 
-  // ── Refresh (re-fetches from API after create/update/delete) ──────
+  Future<int> getCustomerId() async {
+    final id = await _getCustomerIdUsecase();
+    return id.toInt();
+  }
+
   Future<void> refreshRequests() async {
-    if (lastLoadedCustomerId == null) return;
     try {
-      final result = await _getSrByCustomerId(lastLoadedCustomerId!);
-      _allRequests = result;
-      _applySearchAndFilters();
+      final customerId = await getCustomerId();
+      final res = await _getSrByCustomerId(customerId);
+      _allRequests = res;
+      emit(ServiceRequestListSuccess(res));
     } catch (e) {
       emit(ServiceRequestFailure(e.toString()));
     }
   }
 
   // ── Create ────────────────────────────────────────────────────────
-  Future<void> createServiceRequest(CreateSrParams params) async {
-    emit(ServiceRequestLoading());
+  Future<void> createServiceRequest(CreateSrParams params) {
     try {
-      await _createSr(params);
-      emit(ServiceRequestCreated());
-      await refreshRequests();
+      return _createSr(params).then((_) async {
+        emit(ServiceRequestCreated());
+        await refreshRequests();
+      });
     } catch (e) {
       emit(ServiceRequestFailure(e.toString()));
+      rethrow;
     }
   }
 
   // ── Update ────────────────────────────────────────────────────────
-  Future<void> updateServiceRequest(int id, UpdateSrParams params) async {
-    emit(ServiceRequestLoading());
-    try {
-      await _updateSr(id, params);
-      emit(ServiceRequestUpdated());
-      await refreshRequests();
-    } catch (e) {
-      emit(ServiceRequestFailure(e.toString()));
-    }
-  }
+  Future<void> updateServiceRequest(int id, UpdateSrParams params) => _mutate(
+    action: () => _updateSr(id, params),
+    onSuccess: () => ServiceRequestUpdated(),
+  );
 
   // ── Delete ────────────────────────────────────────────────────────
-  Future<void> deleteServiceRequest(int id) async {
+  Future<void> deleteServiceRequest(int id) => _mutate(
+    action: () => _deleteSr(id),
+    onSuccess: () => ServiceRequestDeleted(),
+  );
+
+  // ── Internal: shared create/update/delete plumbing ────────────────
+  // Loads, runs the mutation, refreshes the list, then emits the
+  // terminal state so listeners see up-to-date data alongside it.
+  Future<void> _mutate({
+    required Future<void> Function() action,
+    required ServiceRequestState Function() onSuccess,
+  }) async {
     emit(ServiceRequestLoading());
     try {
-      await _deleteSr(id);
-      emit(ServiceRequestDeleted());
+      await action();
       await refreshRequests();
+      emit(onSuccess());
     } catch (e) {
       emit(ServiceRequestFailure(e.toString()));
     }
@@ -248,12 +256,6 @@ class ServiceRequestCubit extends Cubit<ServiceRequestState> {
     }
 
     emit(ServiceRequestListSuccess(list));
-  }
-
-  // ── Get customer id ───────────────────────────────────────────────
-  Future<int> _getCustomerId() async {
-    final id = await SharedPrefHelper.getInt(LocalStorageKeys.userId);
-    return id.toInt();
   }
 
   // ── Dispose ───────────────────────────────────────────────────────

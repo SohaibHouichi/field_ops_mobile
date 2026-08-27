@@ -1,3 +1,5 @@
+import 'package:field_ops/core/local_storage/local_storage_data.dart';
+import 'package:field_ops/core/usecases/local_storage_usecase.dart';
 import 'package:field_ops/features/assets/data/data_source/assets_remote_datasource.dart';
 import 'package:field_ops/features/assets/data/repository/assets_repository_impl.dart';
 import 'package:field_ops/features/assets/domain/repository/assets_repository.dart';
@@ -18,6 +20,7 @@ void setupAssets(GetIt getIt) {
   getIt.registerLazySingleton<AssetsRepository>(
     () => AssetsRepositoryImpl(getIt<AssetsRemoteDataSource>()),
   );
+
   // ----------------- USECASES ----------------
   getIt.registerLazySingleton(
     () => SearchAssetsUsecase(getIt<AssetsRepository>()),
@@ -34,6 +37,9 @@ void setupAssets(GetIt getIt) {
    getIt.registerLazySingleton(
     () => DeleteAssetsUsecase(getIt<AssetsRepository>()),
   );
+  getIt.registerLazySingleton(
+    () => GetCustomerIdUsecase(getIt<LocalStorageData>()),
+  );
   // ----------------------- CUBIT --------------------
   getIt.registerFactory(
     () => AssetsCubit(
@@ -41,7 +47,8 @@ void setupAssets(GetIt getIt) {
       getIt<AddAssetsUsecase>(),
       getIt<GetAssetsByCustomerIdUseCase>(),
       getIt<EditAssetsUsecase>(),
-      getIt<DeleteAssetsUsecase>()
+      getIt<DeleteAssetsUsecase>(),
+      getIt<GetCustomerIdUsecase>(),
     ),
   );
 }

@@ -25,7 +25,7 @@ class ServiceRequestResponseModel {
   final String? technicianName;
   final int? teamId;
   final String? teamName;
-  final String? addressId;
+  final int? addressId;
   final String? addressLabel;
   final int? assetId;
   final String? assetName;

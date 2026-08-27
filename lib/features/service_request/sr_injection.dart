@@ -1,3 +1,5 @@
+
+import 'package:field_ops/core/usecases/local_storage_usecase.dart';
 import 'package:field_ops/features/service_request/data/data_source/service_request_remote_datasource.dart';
 import 'package:field_ops/features/service_request/data/repository/service_request_repository_impl.dart';
 import 'package:field_ops/features/service_request/domain/repository/service_request_repository.dart';
@@ -42,6 +44,7 @@ void setupSr(GetIt getIt) {
       getSrByCustomerId: getIt<GetSrByCustomerIdUsecase>(),
    //   searchSr: getIt<SearchSrUsecase>(),
       updateSr: getIt<UpdateSrUsecase>(),
+      getCustomerId: getIt<GetCustomerIdUsecase>(),
     ),
   );
 }

@@ -1,4 +1,4 @@
-import 'package:field_ops/core/helpers/shared_pref_helper.dart';
+import 'package:field_ops/core/usecases/local_storage_usecase.dart';
 import 'package:field_ops/features/assets/domain/entities/assets_entity.dart';
 import 'package:field_ops/features/assets/domain/usecases/add_assets_usecase.dart';
 import 'package:field_ops/features/assets/domain/usecases/delete_assets_usecase.dart';
@@ -19,83 +19,91 @@ class AssetsCubit extends Cubit<AssetsState> {
   final GetAssetsByCustomerIdUseCase _assetsByCustomerIdUseCase;
   final EditAssetsUsecase _editAssetsUsecase;
   final DeleteAssetsUsecase _deleteAssetsUsecase;
-
+  final GetCustomerIdUsecase _getCustomerIdUsecase;
   AssetsCubit(
     this._searchAssetsUsecase,
     this._addAssetsUsecase,
     this._assetsByCustomerIdUseCase,
     this._editAssetsUsecase,
-    this._deleteAssetsUsecase,
+    this._deleteAssetsUsecase, 
+    this._getCustomerIdUsecase,
   ) : super(const AssetsInitial());
+/// it 'll change and make the project to be more efficient and make the code more readable and maintainable ──────────────────────────────────────────────
+          // ── Search controller ─────────────────────────────────────────────
+          final TextEditingController searchController = TextEditingController();
 
-  // ── Search controller ─────────────────────────────────────────────
-  final TextEditingController searchController = TextEditingController();
+          // ── Form controllers ──────────────────────────────────────────────
+          final TextEditingController nameController = TextEditingController();
+          final TextEditingController brandController = TextEditingController();
+          final TextEditingController modelController = TextEditingController();
+          final TextEditingController serialController = TextEditingController();
+          final TextEditingController noteController = TextEditingController();
+          final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-  // ── Form controllers ──────────────────────────────────────────────
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController brandController = TextEditingController();
-  final TextEditingController modelController = TextEditingController();
-  final TextEditingController serialController = TextEditingController();
-  final TextEditingController noteController = TextEditingController();
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+          // ── Assets cache ──────────────────────────────────────────────────
+          List<AssetEntity>? _allAssets;
+          List<AssetEntity>? get allAssets => _allAssets;
+          
+          Future<List<AssetEntity>> get allAssetsFuture async {
+            final custId = await getCustomerId();
+            final assets = await _assetsByCustomerIdUseCase(custId);
+            return assets;
+          }
 
-  // ── Assets cache ──────────────────────────────────────────────────
-  List<AssetEntity>? _allAssets;
-  List<AssetEntity>? get allAssets => _allAssets;
+          // ── Active query ──────────────────────────────────────────────────
+          // Tracks the current search string so clearSearch() and setAssets()
+          // don't need to re-derive it from the controller.
+          String _currentQuery = '';
 
-  // ── Active query ──────────────────────────────────────────────────
-  // Tracks the current search string so clearSearch() and setAssets()
-  // don't need to re-derive it from the controller.
-  String _currentQuery = '';
+          // ── Last loaded customer ──────────────────────────────────────────
+          // Prevents re-setting assets when the same customer is already loaded,
+          // while still reloading if the customer actually changes.
+          int? lastLoadedCustomerId;
 
-  // ── Last loaded customer ──────────────────────────────────────────
-  // Prevents re-setting assets when the same customer is already loaded,
-  // while still reloading if the customer actually changes.
-  int? lastLoadedCustomerId;
+          List<AssetEntity> fakeAssetsForSkeletonizer = List.generate(
+            6,
+            (index) => AssetEntity(
+              id: 0,
+              name: 'xxxxxxxxxxxx',
+            ),
+          );
 
-  List<AssetEntity> fakeAssetsForSkeletonizer = List.generate(
-    6,
-    (index) => AssetEntity(
-      id: 0,
-      name: 'xxxxxxxxxxxx',
-    ),
-  );
+          // ── Open asset sheet (create / edit) ──────────────────────────────
+          void openAssetSheet(BuildContext context, {AssetEntity? asset}) {
+            final isEdit = asset != null;
 
-  // ── Open asset sheet (create / edit) ──────────────────────────────
-  void openAssetSheet(BuildContext context, {AssetEntity? asset}) {
-    final isEdit = asset != null;
+            if (!isEdit) {
+              clearForm();
+            } else {
+              nameController.text = asset.name;
+              brandController.text = asset.brand ?? '';
+              modelController.text = asset.model ?? '';
+              serialController.text = asset.serialNumber ?? '';
+              noteController.text = asset.note ?? '';
+            }
 
-    if (!isEdit) {
-      clearForm();
-    } else {
-      nameController.text = asset.name;
-      brandController.text = asset.brand ?? '';
-      modelController.text = asset.model ?? '';
-      serialController.text = asset.serialNumber ?? '';
-      noteController.text = asset.note ?? '';
-    }
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      useRootNavigator: true,
-      builder: (_) => BlocProvider.value(
-        value: this,
-        child: AddAssetsSheet(
-          asset: asset,
-          nameController: nameController,
-          brandController: brandController,
-          modelController: modelController,
-          serialController: serialController,
-          noteController: noteController,
-          formKey: formKey,
-        ),
-      ),
-    ).whenComplete(() {
-      if (isEdit) clearForm();
-    });
-  }
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              useRootNavigator: true,
+              builder: (_) => BlocProvider.value(
+                value: this,
+                child: AddAssetsSheet(
+                  asset: asset,
+                  nameController: nameController,
+                  brandController: brandController,
+                  modelController: modelController,
+                  serialController: serialController,
+                  noteController: noteController,
+                  formKey: formKey,
+                ),
+              ),
+            ).whenComplete(() {
+              if (isEdit) clearForm();
+            });
+          }
+        ///───────────────────────────────────────────── END OF OPEN ASSET SHEET FUNCTION ──────────────────────────────────────────────
 
   // ── Add asset ─────────────────────────────────────────────────────
   Future<void> addAssets({
@@ -223,29 +231,30 @@ class AssetsCubit extends Cubit<AssetsState> {
 
   // ── Get customer id ───────────────────────────────────────────────
   Future<int> getCustomerId() async {
-    final id = await SharedPrefHelper.getInt(LocalStorageKeys.userId);
+    final id = await _getCustomerIdUsecase();
     return id.toInt();
   }
+/// same as the previous function but this one is for the form and it clears the form after the asset is added or edited
+              // ── Clear form ────────────────────────────────────────────────────
+              void clearForm() {
+                nameController.clear();
+                brandController.clear();
+                modelController.clear();
+                serialController.clear();
+                noteController.clear();
+                formKey.currentState?.reset();
+              }
 
-  // ── Clear form ────────────────────────────────────────────────────
-  void clearForm() {
-    nameController.clear();
-    brandController.clear();
-    modelController.clear();
-    serialController.clear();
-    noteController.clear();
-    formKey.currentState?.reset();
-  }
-
-  // ── Dispose ───────────────────────────────────────────────────────
-  @override
-  Future<void> close() {
-    searchController.dispose();
-    nameController.dispose();
-    brandController.dispose();
-    modelController.dispose();
-    serialController.dispose();
-    noteController.dispose();
-    return super.close();
-  }
+              // ── Dispose ───────────────────────────────────────────────────────
+              @override
+              Future<void> close() {
+                searchController.dispose();
+                nameController.dispose();
+                brandController.dispose();
+                modelController.dispose();
+                serialController.dispose();
+                noteController.dispose();
+                return super.close();
+              }
+    ///───────────────────────────────────────────── END OF CLEAR FORM FUNCTION ──────────────────────────────────────────────
 }

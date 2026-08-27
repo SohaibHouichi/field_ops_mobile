@@ -6,7 +6,7 @@ class CreateServiceRequestReqModel {
   final List<MultipartFile>? attachments;
   final String? description;
   final int priority;
-  final String title;
+  final String? title;
   final int? type; // ← nullable: omitted from FormData when null
 
   CreateServiceRequestReqModel({
@@ -15,17 +15,17 @@ class CreateServiceRequestReqModel {
     this.attachments,
     this.description,
     required this.priority,
-    required this.title,
+    this.title,
     this.type,
   });
 
-  Future<FormData> toFormData() async {
+  FormData toFormData() {
     return FormData.fromMap({
       'AddressId': addressId,
       'AssetId': assetId,
-      if (description != null) 'description': description,
+      if (description != null) 'Description': description,
       'Priority': priority,
-      'Title': title,
+      if (title != null) 'Title': title,
       if (type != null) 'Type': type,         // ← only sent when not "other"
       if (attachments != null) 'Attachments': attachments,
     });

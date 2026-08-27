@@ -7,6 +7,7 @@ import 'package:field_ops/features/service_request/domain/usecases/params/update
 
 class ServiceRequestRepositoryImpl implements ServiceRequestRepository {
   final ServiceRequestRemoteDatasource _remoteDatasource;
+
   ServiceRequestRepositoryImpl(this._remoteDatasource);
 
   CreateServiceRequestReqModel _toCreateRequest(dynamic params) =>
@@ -19,6 +20,8 @@ class ServiceRequestRepositoryImpl implements ServiceRequestRepository {
         description: params.description,
         attachments: params.attachments,
       );
+
+
 
   @override
   Future<ServiceRequestEntity> createServiceRequest(

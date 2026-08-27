@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:field_ops/core/di/local_storage_injection.dart';
 import 'package:field_ops/features/assets/assets_injection.dart';
 import 'package:field_ops/features/auth/auth_injection.dart';
 import 'package:field_ops/core/di/home_injection.dart';
@@ -19,6 +20,7 @@ class DiContainer {
 
  
     setupAuth(getIt);
+    setupLocalStorage(getIt);
     setupShell(getIt);
     setupCustomers(getIt);
     setupHome(getIt);

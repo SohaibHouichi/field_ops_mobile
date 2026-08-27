@@ -21,16 +21,13 @@ class ServiceRequestScreen extends StatelessWidget {
       // ✅ Fires on state transitions after widget is mounted
       listener: (context, state) {
         if (state is CustomerSuccess) {
-          cubit.lastLoadedCustomerId = state.customer.id;
           cubit.setRequests(state.customer.serviceRequestsList);
         }
       },
       builder: (context, customerState) {
-        // ✅ Catches already-emitted CustomerSuccess on first build
-        // Guard: only runs when requests haven't been loaded yet
+
         if (customerState is CustomerSuccess && cubit.allRequests == null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            cubit.lastLoadedCustomerId = customerState.customer.id;
             cubit.setRequests(customerState.customer.serviceRequestsList);
           });
         }

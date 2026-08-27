@@ -6,6 +6,7 @@ import 'package:field_ops/features/customer/presentation/cubit/customer_cubit.da
 import 'package:field_ops/features/customer/presentation/widgets/assets_embedded_widgets/customer_assets_widget.dart';
 import 'package:field_ops/features/customer/presentation/widgets/dashboard_widgets/status_chip_widget.dart';
 import 'package:field_ops/features/customer/presentation/widgets/service_request_embedded_widgets/customer_service_requests_widget.dart';
+import 'package:field_ops/features/service_request/presentation/cubit/service_request_cubit.dart';
 import 'package:field_ops/features/technician/presentation/screens/technician_dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -105,14 +106,19 @@ class CustomerDashboard extends StatelessWidget {
               child: ActionButton(
                 icon: Icons.add_circle_outline,
                 label: 'New Request',
-                onTap: () {},
+                onTap: () async {
+                  context.read<ServiceRequestCubit>().openServiceRequestSheet(
+                        context,
+                        await context.read<AssetsCubit>().allAssetsFuture,
+                      );
+                },
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: ActionButton(
                 icon: Icons.history,
-                label: 'History',
+                label: 'Requests History',
                 onTap: () {},
               ),
             ),
